@@ -1,0 +1,1371 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="輸入中英文姓名，依手寫運動學與書法連筆原則自動設計藝術簽名，一筆一劃示範筆順，並可播放全螢幕品牌動畫。">
+<meta name="theme-color" content="#2F6B5A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232F6B5A'/%3E%3Cpath d='M12 42c8-2 12-22 18-22s-6 26 2 26 8-18 14-18-2 14 6 14' fill='none' stroke='%23FBFBF7' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+html{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;-webkit-font-smoothing:antialiased}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Inkline 藝術簽名</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,500&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+:root{
+  --ground:#E4E8E3; --surface:#F2F4F0; --line:#BFC8BF; --text:#1D2622; --muted:#5B6961;
+  --accent:#2F6B5A; --accent-soft:#D3E2DA; --paper:#FBFBF7; --paper-line:#C9D2CA; --focus:#2F6B5A;
+  --serif:"Bodoni Moda","Didot","Times New Roman",serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){color-scheme:dark;
+    --ground:#101614; --surface:#18201D; --line:#2C3833; --text:#E3EAE5; --muted:#93A39A;
+    --accent:#7CC4A9; --accent-soft:#1E3A30; --paper:#F4F5F0; --paper-line:#C9D2CA; --focus:#7CC4A9;}
+}
+:root[data-theme="dark"]{color-scheme:dark;
+  --ground:#101614; --surface:#18201D; --line:#2C3833; --text:#E3EAE5; --muted:#93A39A;
+  --accent:#7CC4A9; --accent-soft:#1E3A30; --paper:#F4F5F0; --paper-line:#C9D2CA; --focus:#7CC4A9;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--ground);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;margin:0}
+a{color:var(--accent)}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 56px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;margin-bottom:22px}
+.brand{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(30px,4vw,42px);line-height:1.1;margin:0;letter-spacing:-.01em}
+.brand span{font-style:normal;font-family:var(--sans);font-weight:500;font-size:.42em;letter-spacing:.08em;color:var(--muted);margin-left:.6em;vertical-align:.35em}
+.tag{color:var(--muted);margin:0;max-width:48ch;font-size:14px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
+.label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--paper);border:1px solid var(--paper-line);border-radius:6px;position:relative;overflow:hidden;box-shadow:0 12px 30px -18px rgba(20,40,30,.35)}
+.card::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;
+  background-image:repeating-linear-gradient(115deg,transparent 0 7px,rgba(47,107,90,.035) 7px 8px),repeating-linear-gradient(65deg,transparent 0 9px,rgba(47,107,90,.03) 9px 10px)}
+.card-head{position:relative;display:flex;justify-content:space-between;gap:12px;padding:12px 16px 0;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:#6F7E76;text-transform:uppercase}
+.stage{position:relative;width:100%;aspect-ratio:16/7.2;min-height:230px}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#cvPractice{touch-action:none;cursor:crosshair}
+.stage.practice #cvInk{opacity:0}
+.speed{position:relative;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:0 16px 4px}
+.speed .label{color:#6F7E76;font-size:10px;line-height:1.3}
+.speed canvas{width:100%;height:40px;display:block}
+.card-foot{position:relative;display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;padding:4px 16px 12px;font-family:var(--mono);font-size:11px;color:#56655D;font-variant-numeric:tabular-nums;border-top:1px dashed var(--paper-line)}
+.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:14px;line-height:1.2}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--paper);font-weight:500}
+.btn.film-btn{background:#15110B;border-color:#15110B;color:#F3DFA8;font-weight:500}
+.btn.film-btn:hover{border-color:#B8893A}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}
+.btn svg{width:14px;height:14px;flex:none}
+.spacer{flex:1 1 auto}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.section{margin-top:28px}
+.section h2{font-family:var(--serif);font-weight:500;font-size:22px;margin:0 0 4px;text-wrap:balance}
+.section p.note{margin:0 0 12px;color:var(--muted);font-size:13.5px;max-width:68ch}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.steps li button{width:100%;text-align:left;display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:9px 11px}
+.steps li button:hover{border-color:var(--accent)}
+.steps .num{font-family:var(--mono);font-size:12px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.steps .t{font-size:14px;line-height:1.35}
+.steps .t small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.steps li.done .num{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}
+.steps li.now button{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.steps li.now .num{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.gallery{display:flex;flex-direction:column;gap:10px}
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.gal-h{margin:8px 0 0;font-size:15px;font-weight:500;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.gal-h span{font-size:12.5px;font-weight:400;color:var(--muted)}
+.thumb{position:relative}
+.badge{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;background:rgba(251,251,247,.92);color:#26312C;border:1px solid var(--paper-line);border-radius:999px;padding:2px 8px;font-variant-numeric:tabular-nums}
+.one{font-style:normal;font-size:10.5px;margin-left:6px;padding:1px 6px;border-radius:999px;background:#2F6B5A;color:#FBFBF7;vertical-align:1px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--ground);border-radius:8px;padding:3px;gap:3px}
+.tabs button{border:0;background:transparent;border-radius:6px;padding:7px 8px;font-size:14px;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.style-grp{grid-column:1/-1;margin:4px 0 0;font-size:11.5px;color:var(--muted);font-family:var(--mono);letter-spacing:.06em}
+.slider input:disabled{opacity:.4}
+.evalbox{display:grid;grid-template-columns:auto 1fr;gap:14px 22px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.ev-grade{display:flex;flex-direction:column;align-items:center;justify-content:center;width:86px;height:86px;border-radius:50%;border:1.5px solid var(--accent)}
+.ev-grade b{font-family:var(--serif);font-weight:500;font-size:34px;line-height:1}
+.ev-grade span{font-family:var(--mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.evbars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px}
+.evbar{display:grid;grid-template-columns:1fr auto;gap:3px 6px;font-size:13px}
+.evbar output{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.evbar .meter{grid-column:1/-1}
+.evbar.low .meter i{background:#B5673A}
+.ev-verdict{grid-column:1/-1;margin:0;font-size:13.5px;color:var(--text);border-top:1px dashed var(--line);padding-top:10px}
+@media (max-width:560px){.evalbox{grid-template-columns:1fr}.ev-grade{margin:0 auto}.evbars{grid-template-columns:1fr 1fr}}
+
+.thumb{background:var(--paper);border:1px solid var(--paper-line);border-radius:6px;padding:0;overflow:hidden;text-align:left;display:flex;flex-direction:column}
+.thumb canvas{width:100%;aspect-ratio:2/1;display:block}
+.thumb .cap{display:flex;justify-content:space-between;gap:8px;padding:6px 10px 8px;font-size:13px;color:#2A3530;border-top:1px dashed var(--paper-line)}
+.thumb .cap em{font-family:var(--mono);font-style:normal;font-size:10px;color:#6F7E76;letter-spacing:.08em;text-transform:uppercase;align-self:center}
+.thumb[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
+.research{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.paper-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 15px;display:flex;flex-direction:column;gap:6px}
+.paper-card .cite{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted)}
+.paper-card h3{margin:0;font-size:15px;font-weight:500;line-height:1.35}
+.paper-card p{margin:0;font-size:13.5px;color:var(--muted)}
+.paper-card .use{font-size:13px;color:var(--text);border-top:1px dashed var(--line);padding-top:6px;margin-top:auto}
+.paper-card .use b{font-weight:500;color:var(--accent)}
+.formula{font-family:var(--mono);font-size:12px;background:var(--paper);color:#26312C;border-radius:4px;padding:5px 8px;overflow-x:auto;white-space:nowrap}
+aside{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow-y:auto}
+.field{display:flex;flex-direction:column;gap:6px}
+input[type=text]{font:inherit;font-size:18px;padding:10px 12px;border-radius:6px;border:1px solid var(--line);background:var(--paper);color:#1D2622;width:100%}
+input[type=text]:focus{outline:2px solid var(--focus);outline-offset:1px;border-color:transparent}
+.hint{font-size:12px;color:var(--muted);margin:0}
+.styles{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.style{display:flex;flex-direction:column;text-align:left;background:transparent;border:1px solid var(--line);border-radius:6px;padding:6px 9px;line-height:1.3}
+.style b{font-weight:500;font-size:14px}
+.style em{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.style[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.style:hover{border-color:var(--accent)}
+.style-desc{font-size:12.5px;color:var(--muted);margin:2px 0 0;line-height:1.45}
+.slider{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.slider label{font-size:13.5px}
+.slider output{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.slider input{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+.inks{display:flex;gap:8px;flex-wrap:wrap}
+.ink{width:28px;height:28px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);padding:0}
+.ink[aria-pressed="true"]{box-shadow:0 0 0 2px var(--accent)}
+.checks{display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.checks input{accent-color:var(--accent);width:16px;height:16px}
+.export{display:none;margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+.export.show{display:block}
+.export img{display:block;max-width:100%;background:#fff;border-radius:4px;border:1px solid var(--line)}
+.export textarea{width:100%;height:110px;font-family:var(--mono);font-size:11px;background:var(--paper);color:#1D2622;border:1px solid var(--line);border-radius:4px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--ground);padding:8px 16px;border-radius:999px;font-size:13.5px;opacity:0;transition:.25s;pointer-events:none;z-index:60}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.examples{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.examples .pill{padding:3px 10px;font-size:13px}
+.sug-controls{display:flex;flex-wrap:wrap;gap:10px 22px;margin-bottom:12px}
+.chipset{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chipset .label{margin-right:4px}
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13.5px;line-height:1.2}
+.pill:hover{border-color:var(--accent)}
+.pill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.sug-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sug{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
+.sug canvas{width:100%;aspect-ratio:2/1;display:block;background:var(--paper);border-bottom:1px dashed var(--paper-line)}
+.sug .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.sug .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sug .rank{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.sug .name{font-size:15px;font-weight:500}
+.sug .pct{text-align:right;font-family:var(--mono);font-size:13px;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.meter{height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent)}
+.sug ul{margin:0;padding-left:1.1em;font-size:13px;color:var(--muted);line-height:1.5}
+.sug .metrics{font-family:var(--mono);font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sug .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
+.sug .acts .btn{padding:5px 11px;font-size:13px}
+@media (max-width:760px){.sug-grid{grid-template-columns:1fr}}
+/* ---------- film ---------- */
+.film{position:fixed;inset:0;z-index:50;background:#000;color:#F3EEE4;font-family:var(--sans)}
+.film canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.film-ui{position:absolute;left:0;right:0;bottom:0;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:center;
+  background:linear-gradient(to top,rgba(0,0,0,.62),rgba(0,0,0,0));transition:opacity .4s}
+.film-top{position:absolute;left:0;right:0;top:0;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.5),rgba(0,0,0,0));transition:opacity .4s;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.film.idle .film-ui,.film.idle .film-top{opacity:0;pointer-events:none}
+.film.idle{cursor:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{border:1px solid rgba(255,255,255,.28);background:rgba(20,20,20,.45);color:#F3EEE4;border-radius:999px;padding:6px 12px;font-size:13px;backdrop-filter:blur(6px)}
+.chip[aria-pressed="true"]{background:#F3EEE4;color:#111;border-color:#F3EEE4}
+.chip:hover{border-color:#fff}
+.film input[type=text]{font-size:13px;padding:6px 10px;width:210px;background:rgba(20,20,20,.55);color:#F3EEE4;border:1px solid rgba(255,255,255,.28);border-radius:999px}
+.film label.lp{display:flex;gap:6px;align-items:center;font-size:13px}
+.film .ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;padding:0}
+.film .ic svg{width:15px;height:15px}
+@media (max-width:880px){
+  .layout{grid-template-columns:1fr}
+  aside{position:static;order:-1;max-height:none}
+  .styles{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:480px){.stage{aspect-ratio:4/3}.wrap{padding-inline:16px}.styles{grid-template-columns:1fr 1fr}.film input[type=text]{width:100%}}
+@media (prefers-reduced-motion:reduce){.toast,.film-ui,.film-top{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="brand">Inkline<span>藝術簽名產生器</span></h1>
+    <p class="tag">輸入英文名字、挑一種風格，系統依手寫運動學模型自動設計簽名，一筆一劃示範起筆、連筆與收尾，也能播成全螢幕品牌動畫。</p>
+  </header>
+
+  <div class="layout">
+    <main>
+      <div class="card">
+        <div class="card-head"><span id="headStyle">Classic Script</span><span id="headSeed">No. 0001</span></div>
+        <div class="stage" id="stage">
+          <canvas id="cvGuide"></canvas><canvas id="cvInk"></canvas><canvas id="cvTop"></canvas><canvas id="cvPractice" hidden></canvas>
+        </div>
+        <div class="speed"><span class="label">筆速<br>曲線</span><canvas id="cvSpeed"></canvas></div>
+        <div class="card-foot"><span id="stats">—</span><span id="nowLabel">—</span></div>
+      </div>
+
+      <div class="transport">
+        <button class="btn primary" id="bPlay" type="button"><svg viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg><span>播放示範</span></button>
+        <button class="btn" id="bPrev" type="button"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>上一筆</button>
+        <button class="btn" id="bNext" type="button">下一筆<svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
+        <button class="btn" id="bStep" type="button" aria-pressed="false">逐筆模式</button>
+        <button class="btn" id="bPractice" type="button" aria-pressed="false">描寫練習</button>
+        <button class="btn" id="bClear" type="button" hidden>清除練習</button>
+        <span class="spacer"></span>
+        <button class="btn film-btn" id="bFilm" type="button"><svg viewBox="0 0 16 16"><path d="M2 5V2h3M11 2h3v3M14 11v3h-3M5 14H2v-3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>全螢幕品牌動畫</button>
+      </div>
+
+      <section class="section" aria-labelledby="hEval">
+        <h2 id="hEval">設計評估</h2>
+        <p class="note">每個設計都依實際產生的筆跡計算：提筆次數、轉折密度、墨跡重疊、長寬比例、粗細對比與書寫秒數。</p>
+        <div class="evalbox"><div class="ev-grade"><b id="evGrade">A</b><span id="evScore">—</span></div><div class="evbars" id="evBars"></div><p class="ev-verdict" id="evVerdict"></p></div>
+      </section>
+
+      <section class="section" aria-labelledby="hSug">
+        <h2 id="hSug">自動建議</h2>
+        <p class="note">選擇簽名的用途和想呈現的感覺。系統會分析名字的字母結構，產生數十個候選版本並逐一評分，挑出最適合的三個，附上推薦理由。</p>
+        <div class="sug-controls">
+          <div class="chipset" role="group" aria-label="用途" id="sugUse"><span class="label">用途</span></div>
+          <div class="chipset" role="group" aria-label="想呈現的感覺" id="sugMood"><span class="label">感覺</span></div>
+          <div class="chipset"><button type="button" class="pill" id="sugOne" aria-pressed="false">只看一筆簽完的設計</button></div>
+        </div>
+        <div class="sug-grid" id="sugGrid"></div>
+      </section>
+
+      <section class="section" aria-labelledby="hSteps">
+        <h2 id="hSteps">筆順拆解</h2>
+        <p class="note">每一筆都是筆尖不離紙的一段。點任一筆，就從那一筆開始示範。上方的筆速曲線顯示這一筆哪裡快、哪裡慢。</p>
+        <ol class="steps" id="steps"></ol>
+      </section>
+
+      <section class="section" aria-labelledby="hGal">
+        <h2 id="hGal">自動設計：同一個名字，十二種簽法</h2>
+        <p class="note">右上角是每個設計的評估等級與總分。按「換一個變化」會依重複合成法擾動參數，重新計算比例、基線起伏、旋轉與收尾花飾。</p>
+        <div class="gallery" id="gallery"></div>
+      </section>
+
+      <div class="transport" style="margin-top:22px">
+        <button class="btn" id="bSvg" type="button">複製 SVG</button>
+        <button class="btn" id="bPng" type="button">產生 PNG 圖檔</button>
+      </div>
+      <div class="export" id="export"></div>
+
+      <section class="section" aria-labelledby="hRes">
+        <h2 id="hRes">研究基礎</h2>
+        <p class="note">這個產生器不是把字型描邊播放，而是依手寫運動控制與合成簽名的研究，模擬「一個人怎麼簽」。下列是用到的模型，以及它在工具裡對應的功能。</p>
+        <div class="research">
+          <article class="paper-card">
+            <span class="cite">Plamondon · Kinematic Theory</span>
+            <h3>Sigma-Lognormal 速度模型</h3>
+            <p>快速手寫動作可拆成多個子筆畫，每段速度呈對數常態的鐘形曲線，起筆慢、中段快、收筆慢。</p>
+            <div class="formula">v(t) = D / (σ√(2π)(t−t₀)) · exp(−(ln(t−t₀)−μ)² / 2σ²)</div>
+            <p class="use"><b>用在</b>每筆的加減速與示範動畫的節奏；筆速曲線就是這個模型的輸出。</p>
+          </article>
+          <article class="paper-card">
+            <span class="cite">Lacquaniti, Terzuolo &amp; Viviani 1983</span>
+            <h3>2/3 冪次律</h3>
+            <p>手部運動的角速度與曲率的 2/3 次方成正比，換算成切線速度就是彎得越急、寫得越慢。</p>
+            <div class="formula">A = K · C^(2/3)　⇔　v = K · R^(1/3)</div>
+            <p class="use"><b>用在</b>計算筆尖在每個點的速度：圈與轉角處放慢，直線段加速。</p>
+          </article>
+          <article class="paper-card">
+            <span class="cite">Ferrer et al. · Synthetic Off-line Signatures</span>
+            <h3>墨水沉積模型</h3>
+            <p>靜態簽名影像的筆跡粗細與濃淡，取決於書寫當下的速度與筆具：慢處墨多，快處變細。</p>
+            <p class="use"><b>用在</b>原子筆、簽字筆、鉛筆等筆具的線寬變化；與尖頭筆「下筆粗、上提細」的規則疊加。</p>
+          </article>
+          <article class="paper-card">
+            <span class="cite">Ferrer et al. · Signature Structure</span>
+            <h3>文字 + 花飾的簽名結構</h3>
+            <p>合成簽名研究把簽名分成可讀的文字部分與花飾（flourish），花飾有底線、回勾、繞圈、西班牙式花押等類型。</p>
+            <p class="use"><b>用在</b>七種收尾花飾：底線、雙底線、長尾、繞圈尾、花押、橢圓圈、螺旋。</p>
+          </article>
+          <article class="paper-card">
+            <span class="cite">Diaz, Ferrer et al. · Duplicated Synthesis</span>
+            <h3>重複合成與個人變異</h3>
+            <p>以變形幅度 m 擾動 lognormal 參數，並加上正弦空間扭曲、旋轉與位移，產生同一人不同次的簽名。</p>
+            <p class="use"><b>用在</b>「書寫變異度」滑桿與「換一個變化」按鈕。</p>
+          </article>
+          <article class="paper-card">
+            <span class="cite">Make Me a Hanzi · 書法理論</span>
+            <h3>中文筆順、楷書輪廓與行草連筆</h3>
+            <p>9,500 個漢字的標準筆順中線資料（Hanzi Writer 使用同一套），加上行草書「牽絲映帶」「化方為圓」的連筆原則。</p>
+            <p class="use"><b>用在</b>楷書系列直接使用資料集裡的楷書筆畫輪廓，沿筆順中線逐筆顯影；連筆與一筆簽系列則沿中線以硬筆或毛筆重寫。</p>
+          </article>
+          <article class="paper-card">
+            <span class="cite">Bluemlein Collection · Sudtipos</span>
+            <h3>真人簽名字型的筆跡骨架</h3>
+            <p>Mrs Saint Delafield、Herr Von Muellerhoff 等字型源自 1930 年代收集真人簽名整理出的字母。把字形骨架化後，可以同時取得中心線、每一點的筆寬與書寫順序。</p>
+            <p class="use"><b>用在</b>英文 15 種風格的字母來源；筆寬直接取自原字形，再依風格放大首字、壓扁小寫、加上單一收尾筆畫。</p>
+          </article>
+          <article class="paper-card">
+            <span class="cite">Signature design services</span>
+            <h3>商業簽名設計的共同規則</h3>
+            <p>Fiverr、Etsy、Artlogo 與中文簽名工作室的案例：首字放大包住後文、小寫壓成波浪、只用一個收尾筆畫、基線上揚；中文則字距緊密、姓氏為主、一筆誇張的長筆收尾。</p>
+            <p class="use"><b>用在</b>每個風格的比例、花飾數量與排版，以及評估裡的吸引力與易讀性。</p>
+          </article>
+          <article class="paper-card">
+            <span class="cite">Graves 2013 · Handwriting Synthesis</span>
+            <h3>RNN 手寫合成</h3>
+            <p>以 LSTM 加混合密度網路逐點預測筆跡，並用 bias 參數在「工整」與「潦草」之間取捨。</p>
+            <p class="use"><b>用在</b>風格設計的參考：工整度對應本工具的壓平係數與字母壓縮，例如醫師草簽與極簡線條的差異。</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <aside aria-label="簽名設定">
+      <div class="tabs" role="tablist" aria-label="簽名語言"><button type="button" role="tab" id="tabLatin" aria-selected="true">英文簽名</button><button type="button" role="tab" id="tabCn" aria-selected="false">中文簽名</button></div>
+      <div class="field">
+        <label class="label" for="name">姓名</label>
+        <input type="text" id="name" maxlength="28" autocomplete="off" spellcheck="false">
+        <p class="hint" id="nameHint">支援英文名字與中文姓名，名字之間用空格分開。</p>
+        <div class="examples"><span class="hint">試試：</span><button type="button" class="pill" data-ex="張宇恆">張宇恆</button><button type="button" class="pill" data-ex="林雨晴">林雨晴</button><button type="button" class="pill" data-ex="Ethan Wu">Ethan Wu</button><button type="button" class="pill" data-ex="Tygrus">Tygrus</button><button type="button" class="pill" data-ex="Amy ♡ Chen">Amy ♡ Chen</button><button type="button" class="pill" data-ex="張宇恆★">張宇恆★</button></div>
+      </div>
+      <div class="field">
+        <span class="label" id="styleCount">簽名風格 · 英文 12 種</span>
+        <div class="styles" id="styles"></div>
+        <p class="style-desc" id="styleDesc"></p>
+      </div>
+      <button class="btn primary" id="bVary" type="button" style="justify-content:center"><svg viewBox="0 0 16 16"><path d="M13 5.5A5.5 5.5 0 0 0 3 6M3 10.5A5.5 5.5 0 0 0 13 10M13 2v3.5H9.5M3 14v-3.5h3.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>換一個變化</button>
+      <div class="slider"><label for="sSlant">額外傾斜</label><output id="oSlant"></output><input type="range" id="sSlant" min="-10" max="30" step="1"></div>
+      <div class="slider"><label for="sCap" id="lblCap">首字母比例</label><output id="oCap"></output><input type="range" id="sCap" min="1" max="3.2" step="0.05"></div>
+      <div class="slider" id="rowLink" hidden><label for="sLink">連筆程度</label><output id="oLink"></output><input type="range" id="sLink" min="0" max="1" step="0.05"></div>
+      <div class="slider" id="rowSimp" hidden><label for="sSimp">草化程度</label><output id="oSimp"></output><input type="range" id="sSimp" min="0" max="1" step="0.05"></div>
+      <div class="slider"><label for="sSw">收尾花飾</label><output id="oSw"></output><input type="range" id="sSw" min="0" max="2" step="0.05"></div>
+      <div class="slider"><label for="sW">筆畫粗細</label><output id="oW"></output><input type="range" id="sW" min="0.4" max="2" step="0.05"></div>
+      <div class="slider"><label for="sM">書寫變異度 m</label><output id="oM"></output><input type="range" id="sM" min="0" max="2" step="0.05"></div>
+      <div class="slider"><label for="sSpeed">示範速度</label><output id="oSpeed"></output><input type="range" id="sSpeed" min="0.3" max="3" step="0.1" value="1"></div>
+      <div class="field"><span class="label">墨水</span><div class="inks" id="inks"></div></div>
+      <div class="checks">
+        <label><input type="checkbox" id="cGhost" checked>顯示描紅底稿</label>
+        <label><input type="checkbox" id="cNums" checked>顯示起筆編號</label>
+        <label id="lblInit"><input type="checkbox" id="cInit">名字縮寫（E. Wu）</label>
+        <label id="lblSeal" hidden><input type="checkbox" id="cSeal">加蓋印章</label>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="film" id="film" hidden>
+  <canvas id="filmCv"></canvas>
+  <div class="film-top"><span id="filmTitle">Inkline Film</span>
+    <span style="display:flex;gap:8px">
+      <button class="chip ic" id="fFull" type="button" aria-label="切換瀏覽器全螢幕"><svg viewBox="0 0 16 16"><path d="M2 5V2h3M11 2h3v3M14 11v3h-3M5 14H2v-3" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
+      <button class="chip ic" id="fClose" type="button" aria-label="關閉動畫"><svg viewBox="0 0 16 16"><path d="m3 3 10 10M13 3 3 13" stroke="currentColor" stroke-width="1.6"/></svg></button>
+    </span>
+  </div>
+  <div class="film-ui">
+    <div class="chips" id="sceneChips"></div>
+    <input type="text" id="fTag" placeholder="品牌標語（選填）" maxlength="40" aria-label="品牌標語">
+    <label class="lp"><input type="checkbox" id="fLoop" checked>循環播放</label>
+    <button class="chip" id="fReplay" type="button">重播</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="config.js"></script>
+<script>
+const STYLES = {
+  /* ---------- English · one-stroke series ---------- */
+  oneLine:{one:true,oneStroke:true,dropLate:true,hand:'herr-von-muellerhoff',zh:'一筆流線',en:'One-Line',desc:'整個名字不提筆寫完，省略 i 的點與 t 的橫；最後回勾橫越字母當橫線，再順勢拉成底線。',
+    slant:0,cap:1.35,rest:.92,flat:.85,sx:.95,capAdv:.9,rise:.05,sw:1,flourish:['sweep'],jit:.3,space:.55,wm:1},
+  autograph:{one:true,oneStroke:true,dropLate:true,hand:'mrs-saint-delafield',zh:'名人快簽',en:'Autograph',desc:'首字母放大並包住後面的字母，小寫壓成流動的波浪，只用一個收尾筆畫拉出底線。',
+    slant:4,cap:1.6,rest:.85,flat:.72,sx:.88,capAdv:.78,rise:.09,sw:1,flourish:['tail','loopTail'],jit:.4,space:.4,wm:1},
+  loopLine:{one:true,oneStroke:true,dropLate:false,hand:'ms-madi',zh:'一筆連環',en:'Loop Line',desc:'連 i 的點都用細線帶過，筆跡在字母之間繞出連環，最後把整個名字圈起來。',
+    slant:0,cap:1.35,rest:.9,flat:.85,sx:.92,capAdv:.85,rise:.03,sw:1,flourish:['ring'],jit:.25,space:.5,wm:1},
+  paraphOne:{one:true,oneStroke:true,dropLate:true,hand:'the-nautigal',zh:'一筆花押',en:'One-Stroke Rúbrica',desc:'名字寫完不收筆，直接往下折返成西式花押，是西班牙語系簽名最經典的一筆完成法。',
+    slant:2,cap:1.4,rest:.92,flat:.85,sx:.95,capAdv:.85,rise:.03,sw:1.05,flourish:['paraphC'],jit:.25,space:.5,wm:1.05},
+  emoteEN:{hand:'ms-madi',emote:true,emotes:['heart','smile','star','wink'],zh:'符號簽名',en:'Symbol Script',desc:'符號直接長在字母裡：o 寫成愛心或笑臉、i 的點變成愛心或星星、大寫戴上皇冠，收尾拉成愛心或星星。',
+    slant:0,cap:1.3,rest:.95,flat:.92,sx:.97,capAdv:.95,rise:.04,sw:.8,flourish:['tail','underline'],jit:.2,space:.7,wm:1},
+  /* ---------- English · classic series ---------- */
+  classic:{hand:'mr-de-haviland',zh:'經典優雅',en:'Classic Elegant',desc:'字母完整的連寫草書，首字母略放大，一道由粗到細的簡單底線。',
+    slant:0,cap:1.2,rest:1,flat:1,sx:1,capAdv:1,rise:.02,sw:.8,flourish:['underline'],jit:.15,space:1,wm:1.05},
+  copper:{hand:'monsieur-la-doulaise',zh:'花體銅版',en:'Copperplate',desc:'大寫自帶華麗捲曲，不再額外加花飾，只保留一處視覺重點。',
+    slant:0,cap:1.1,rest:1,flat:1,sx:1,capAdv:1,rise:0,sw:0,flourish:['underline'],jit:.1,space:1,wm:1.1},
+  grand:{hand:'windsong',zh:'大寫花飾',en:'Grand Flourish',desc:'寬闊舒展的大寫與長弧線，適合品牌標誌與邀請卡。',
+    slant:0,cap:1.1,rest:1,flat:1,sx:.92,capAdv:.95,rise:0,sw:0,flourish:['underline'],jit:.1,space:.8,wm:1.1},
+  business:{hand:'mr-de-haviland',autoInit:true,zh:'商務簽名',en:'Business',desc:'名字縮寫加完整姓氏，筆畫加重，雙底線帶出正式與權威感。',
+    slant:2,cap:1.4,rest:.95,flat:.9,sx:.95,capAdv:.9,rise:.03,sw:.9,flourish:['double'],jit:.2,space:.8,wm:1.4},
+  initSur:{hand:'herr-von-muellerhoff',autoInit:true,zh:'縮寫姓氏',en:'Initial + Surname',desc:'首字母加姓氏，約兩秒簽完，是合約上最常見的寫法。',
+    slant:0,cap:1.45,rest:.95,flat:.85,sx:.95,capAdv:.85,rise:.05,sw:.9,flourish:['underline','tail'],jit:.25,space:.7,wm:1.05},
+  minimal:{hand:'sacramento',pen:'mono',zh:'極簡單線',en:'Monoline',desc:'單一粗細的圓潤單線，乾淨俐落，沒有任何花飾。',
+    slant:0,cap:1.05,rest:1,flat:1,sx:1,capAdv:1,rise:0,sw:0,flourish:['underline'],jit:.1,space:1,wm:.8},
+  marker:{hand:'mr-dafoe',zh:'粗筆簽名',en:'Bold Marker',desc:'簽字筆飽滿的墨色，基線上揚，再用一道底線收尾，像海報上的簽名。',
+    slant:0,cap:1.2,rest:.95,flat:.92,sx:.95,capAdv:.92,rise:.08,sw:.9,flourish:['underline'],jit:.25,space:.7,wm:.95},
+  brush:{hand:'hurricane',zh:'筆刷揮灑',en:'Brush',desc:'乾筆刷的節奏與輕重，收尾拉出長鋒，個性鮮明。',
+    slant:0,cap:1.3,rest:.95,flat:.9,sx:.95,capAdv:.9,rise:.06,sw:.9,flourish:['tail'],jit:.3,space:.7,wm:1},
+  scrawl:{hand:'qwigley',zh:'快寫草簽',en:'Quick Scrawl',desc:'只保留大寫當錨點，其餘壓成波浪，一兩秒就簽完，最難模仿。',
+    slant:4,cap:1.6,rest:.85,flat:.45,sx:.75,capAdv:.72,rise:.1,sw:1,flourish:['dash','tail'],jit:.5,space:.35,wm:1.05},
+  monogram:{hand:'monsieur-la-doulaise',monogram:true,zh:'首字花押',en:'Monogram',desc:'只寫名字的首字母，大寫交疊，再用一個橢圓圈起來。',
+    slant:0,cap:1,rest:1,flat:1,sx:1,capAdv:.55,rise:0,sw:1,flourish:['oval'],jit:.15,space:0,wm:1.1},
+  casual:{hand:'allison',zh:'隨性手寫',en:'Casual',desc:'輕鬆自然的日常筆跡，稍微上揚，看起來像隨手一簽。',
+    slant:0,cap:1.15,rest:1,flat:.95,sx:1,capAdv:.95,rise:.04,sw:.6,flourish:['underline'],jit:.25,space:.8,wm:1},
+  /* ---------- Chinese · one-stroke series (hard pen / brush, stroke medians) ---------- */
+  oneline:{script:'cn',one:true,oneStroke:true,zh:'一筆簽',en:'One Stroke',desc:'整個名字筆尖不離紙一次寫完，姓氏為主、名字為輔，是中文藝術簽名最常見的形式。',slant:10,cap:1.3,rest:.88,track:.68,link:1,linkX:1,simplify:.75,pen:'penCN',w:.62,sw:1.1,flourish:['loopTail','tail'],jit:.45,rise:.07,drop:.3},
+  ringCN:{script:'cn',one:true,oneStroke:true,zh:'一筆環簽',en:'Ring Stroke',desc:'一筆寫完名字後不收筆，順勢把整個名字圈起來，完整又有記憶點。',slant:8,cap:1.2,rest:.9,track:.72,link:1,linkX:1,simplify:.65,pen:'penCN',w:.6,sw:1,flourish:['ring'],jit:.35,rise:.04,drop:.2},
+  star:{script:'cn',one:true,oneStroke:true,zh:'明星連筆',en:'Star Autograph',desc:'姓氏放大當骨架，名字縮小緊靠在右下，一筆連到底再拉出長尾。',slant:12,cap:1.55,rest:.72,track:.58,link:1,linkX:1,simplify:.6,pen:'penCN',w:.64,sw:1.2,flourish:['loopTail','tail'],jit:.45,rise:.09,drop:.45},
+  swiftCN:{script:'cn',one:true,oneStroke:true,zh:'一筆疾書',en:'Swift Brush',desc:'毛筆一口氣寫完，字形大幅草化、壓扁拉長，收尾一記長鋒，氣勢最強。',slant:14,cap:1.35,rest:.85,track:.64,link:1,linkX:1,simplify:.9,pen:'brushCN',w:.95,sw:1.3,flourish:['tail'],jit:.6,rise:.08,drop:.35},
+  /* ---------- Chinese · Kai outline series (real stroke outlines, revealed in stroke order) ---------- */
+  xingOut:{script:'cn',outline:true,zh:'行楷流麗',en:'Xingkai',desc:'標準楷書筆畫加上細牽絲映帶，字距收緊、內緊外鬆，最後一筆拉長收鋒。',slant:4,cap:1.18,rest:.92,track:.82,link:.55,linkX:.35,simplify:0,sw:.9,flourish:['tailCN'],jit:.22,rise:.03,drop:.28},
+  kaiOut:{script:'cn',outline:true,zh:'楷書端正',en:'Kaishu',desc:'以楷書筆畫逐筆寫出，字字端正，最正式也最好辨認。',slant:0,cap:1.08,rest:1,track:.9,link:0,linkX:0,simplify:0,sw:0,flourish:[],jit:.1,rise:0,drop:.2,seal:true},
+  bizOut:{script:'cn',outline:true,zh:'商務行楷',en:'Business Kai',desc:'姓氏放大、名字收小緊靠，下方一道由粗到細的長橫托住整個名字。',slant:6,cap:1.35,rest:.8,track:.72,link:.35,linkX:.25,simplify:0,sw:1,flourish:['underline'],jit:.2,rise:.05,drop:.38},
+  threadOut:{script:'cn',outline:true,zh:'一線貫穿',en:'Thread Line',desc:'字與字緊密穿插，一道長橫從第一個字貫穿到最後，品牌感最強。',slant:5,cap:1.25,rest:.9,track:.74,link:.3,linkX:.2,simplify:0,sw:1,flourish:['thread'],jit:.18,rise:.04,drop:.22},
+  vertOut:{script:'cn',outline:true,zh:'直式落款',en:'Vertical',desc:'書畫落款的格式，由上往下直寫，下方蓋上印章。',slant:0,cap:1.05,rest:.95,track:.88,link:.3,linkX:.2,simplify:0,sw:0,flourish:[],jit:.15,rise:0,drop:0,vertical:true,seal:true},
+  /* ---------- Chinese · cursive pen series ---------- */
+  cuteCN:{script:'cn',emote:true,emotes:['heart','smile','star','wink'],zh:'符號可愛簽',en:'Symbol Cute',desc:'符號融進字形：「口」部件畫成愛心或笑臉、點畫變成愛心星星，收筆再捲成一顆愛心，適合粉絲簽名與社群。',slant:3,cap:1.2,rest:.92,track:.8,link:.5,linkX:.2,simplify:.35,pen:'penCN',w:.62,sw:.8,flourish:['tail'],jit:.22,rise:.03,drop:.25},
+  cao:{script:'cn',zh:'草書狂放',en:'Caoshu',desc:'轉折化方為圓，筆畫省略相連，整個名字一氣呵成。',slant:9,cap:1.3,rest:.9,track:.72,link:1,linkX:.75,simplify:.75,pen:'brushCN',w:1,sw:1,flourish:['tail','loopTail'],jit:.55,rise:.05,drop:.3},
+  pen:{script:'cn',zh:'硬筆行書',en:'Pen Xingshu',desc:'原子筆寫的行書，部分連筆，筆畫俐落，適合日常簽署。',slant:5,cap:1.15,rest:.95,track:.84,link:.5,linkX:.12,simplify:.25,pen:'penCN',w:.55,sw:.5,flourish:['underline'],jit:.22,rise:.02,drop:.25}
+};
+const scriptOf=k=>STYLES[k].script||'latin';
+const PEN_SENS={pointed:.15,mono:.08,nib:.08,brush:.3,ballpoint:.45,marker:.3,pencil:.35};
+const INKS=[{n:'墨黑',c:'#1B1E26'},{n:'藏青',c:'#1E3A72'},{n:'棕墨',c:'#5B3A20'},{n:'酒紅',c:'#7C1F2E'},{n:'森綠',c:'#1F5144'}];
+// default names; config.js (Docker: env DEFAULT_NAME_LATIN / DEFAULT_NAME_CN) overrides non-empty values
+const DEF={latin:'Tygrus',cn:'張宇恆'};for(const[k,v]of Object.entries(window.INKLINE_DEFAULTS||{}))if(v)DEF[k]=v;
+const state={names:{...DEF},loading:false,link:.5,simp:0,script:'latin',seal:false,name:DEF.latin,style:'classic',seed:0,ink:INKS[1].c,slant:0,cap:1.2,sw:.8,w:1,m:1,speed:1,ghost:true,nums:true,initials:false,step:false,practice:false};
+document.getElementById('name').value=state.name;
+
+/* ============ utils ============ */
+function rng(seed){let a=(seed>>>0)||1;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){return Math.sqrt(-2*Math.log(r()+1e-9))*Math.cos(6.2832*r())}
+const hyp=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1]);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>{t=clamp(t,0,1);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
+function bbox(pts){let a=[1e9,1e9,-1e9,-1e9];for(const p of pts){if(p[0]<a[0])a[0]=p[0];if(p[1]<a[1])a[1]=p[1];if(p[0]>a[2])a[2]=p[0];if(p[1]>a[3])a[3]=p[1]}return{minX:a[0],minY:a[1],maxX:a[2],maxY:a[3],w:a[2]-a[0],h:a[3]-a[1]}}
+function bez(p0,p1,p2,p3,n){const o=[];for(let i=1;i<=n;i++){const t=i/n,u=1-t;o.push([u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0],u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]])}return o}
+function dedupe(pts){const o=[pts[0]];for(let i=1;i<pts.length;i++)if(hyp(o[o.length-1],pts[i])>0.05)o.push(pts[i]);return o}
+function spline(pts,step){
+  pts=dedupe(pts); if(pts.length<2) return pts.slice();
+  const n=pts.length,P=[[2*pts[0][0]-pts[1][0],2*pts[0][1]-pts[1][1]],...pts,[2*pts[n-1][0]-pts[n-2][0],2*pts[n-1][1]-pts[n-2][1]]],out=[];
+  const d=(a,b)=>Math.max(1e-4,Math.sqrt(hyp(a,b)));
+  for(let i=1;i<P.length-2;i++){
+    const p0=P[i-1],p1=P[i],p2=P[i+1],p3=P[i+2],t0=0,t1=d(p0,p1),t2=t1+d(p1,p2),t3=t2+d(p2,p3),m=Math.max(1,Math.ceil(hyp(p1,p2)/step));
+    for(let j=0;j<m;j++){const t=t1+(t2-t1)*j/m,L=(a,b,ta,tb)=>{const u=(t-ta)/(tb-ta);return[a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u]};
+      const A1=L(p0,p1,t0,t1),A2=L(p1,p2,t1,t2),A3=L(p2,p3,t2,t3),B1=L(A1,A2,t0,t2),B2=L(A2,A3,t1,t3);out.push(L(B1,B2,t1,t2))}
+  }
+  out.push(pts[n-1]);return out;
+}
+function lowerBound(arr,v){let lo=0,hi=arr.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(arr[m]<=v)lo=m;else hi=m-1}return lo}
+
+/* ============ signature engine · English (pen skeletons of real signature fonts) ============ */
+const V0=55; // base pen speed, glyph units / s
+let HANDS=null,handsLoad=null;
+function loadHands(){if(!handsLoad)handsLoad=fetch('hands.json').then(r=>{if(!r.ok)throw new Error('http');return r.json()}).then(d=>{HANDS=d;return d}).catch(e=>{handsLoad=null;throw e});return handsLoad}
+function resampleR(pts,step){
+  const out=[pts[0].slice()];
+  for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],d=hyp(a,b),n=Math.max(1,Math.ceil(d/step));
+    const known=a[2]>=0&&b[2]>=0;
+    for(let j=1;j<=n;j++){const u=j/n;out.push([a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,known?a[2]+(b[2]-a[2])*u:(u<.5&&j<n?a[2]:b[2])])}}
+  for(let pass=0;pass<2;pass++){const q=out.map(p=>p.slice());for(let i=1;i<out.length-1;i++){out[i][0]=(q[i-1][0]+2*q[i][0]+q[i+1][0])/4;out[i][1]=(q[i-1][1]+2*q[i][1]+q[i+1][1])/4}}
+  return out}
+// fill unknown radii: NaN = connector hairline, -1 = flourish taper
+function fillR(P,baseR){
+  const n=P.length;let i=0;
+  while(i<n){
+    if(P[i][2]>=0){i++;continue}
+    const kind=Number.isNaN(P[i][2])?'c':'f';let j=i;while(j<n&&!(P[j][2]>=0)&&(Number.isNaN(P[j][2])?'c':'f')===kind)j++;
+    const L=i>0&&P[i-1][2]>=0?P[i-1][2]:null,R=j<n&&P[j][2]>=0?P[j][2]:null,len=j-i;
+    for(let k=i;k<j;k++){const u=(k-i+1)/(len+1);
+      if(kind==='c'){const h=Math.min(L??baseR,R??baseR)*.42;P[k][2]=h+((L??h)-h)*Math.max(0,1-u*6)+((R??h)-h)*Math.max(0,1-(1-u)*6)}
+      else{const r0=L??baseR*.9;P[k][2]=R!=null?r0+(R-r0)*u:Math.max(baseR*.06,r0*(1.05-.95*Math.pow(u,.85))*(1+.25*Math.sin(Math.PI*Math.min(1,u*1.6))))}}
+    i=j}
+  return P}
+function kinematics(S){
+  const P=S.pts,n=P.length,cum=[0];for(let i=1;i<n;i++)cum.push(cum[i-1]+hyp(P[i-1],P[i]));
+  const L=cum[n-1]||.01;S.len=L;S.cum=cum;
+  let v=P.map((p,i)=>{const a=P[Math.max(0,i-3)],c=P[Math.min(n-1,i+3)],d1=[p[0]-a[0],p[1]-a[1]],d2=[c[0]-p[0],c[1]-p[1]],ds=Math.hypot(...d1)+Math.hypot(...d2);
+    if(ds<1e-3)return 1;return Math.pow(Math.abs(Math.atan2(d1[0]*d2[1]-d1[1]*d2[0],d1[0]*d2[0]+d1[1]*d2[1]))/ds+.03,-1/3)});
+  const med=[...v].sort((a,b)=>a-b)[n>>1]||1;v=v.map(x=>clamp(x/med,.35,2.2));
+  for(let pass=0;pass<2;pass++)v=v.map((x,i)=>(v[Math.max(0,i-3)]+v[Math.max(0,i-1)]+2*x+v[Math.min(n-1,i+1)]+v[Math.min(n-1,i+3)])/6);
+  const eA=Math.min(2.2,L*.22),eB=Math.min(3.2,L*.3),flStart=S.flLen?L-S.flLen:1e9;
+  v=v.map((x,i)=>{const s=cum[i];let env=L<8?.2+Math.exp(-Math.pow(Math.log(clamp(s/L,.01,.99)/.38),2)/(2*.3)):Math.min(.22+.78*smooth(s/eA),.18+.82*smooth((L-s)/eB));
+    let f=1;if(s>flStart)f=1+.9*smooth((s-flStart)/(S.flLen*.5));if(S.fast&&S.fast[i])f*=1.6;return x*env*f});
+  S.v=v;const t=[0];for(let i=1;i<n;i++)t.push(t[i-1]+(cum[i]-cum[i-1])/(V0*Math.max(.12,(v[i-1]+v[i])/2)));S.t=t;S.dur=t[n-1]||.05;
+}
+/* hand-drawn symbols, returned as ordered pen strokes (in writing order) */
+const SYM_ZH={heart:'愛心',star:'星星',sparkle:'閃亮星芒',smile:'笑臉',wink:'眨眼笑臉',laugh:'大笑臉',note:'音符',sun:'太陽',moon:'月亮',flower:'小花',crown:'皇冠',infinity:'無限符號',bolt:'閃電',check:'勾勾',wave:'波浪',plus:'加號'};
+function doodle(type,cx,cy,s){
+  const out=[],R=s/2;
+  const arc=(x,y,r,a0,a1,n=40,sy=1)=>{const a=[];for(let i=0;i<=n;i++){const g=a0+(a1-a0)*i/n;a.push([x+Math.cos(g)*r,y+Math.sin(g)*r*sy])}return a};
+  const dot=(x,y,e)=>[[x,y-e*.5],[x+e*.3,y],[x,y+e*.5],[x-e*.3,y],[x,y-e*.5]];
+  const face=(kind,withOutline)=>{
+    if(withOutline)out.push({pts:arc(cx,cy,R,-Math.PI*.35,-Math.PI*2.4,44),name:'臉的輪廓'});
+    const e=s*.13,ey=cy-s*.1,lx=cx-s*.17,rx=cx+s*.17,hat=(x)=>[[x-s*.09,ey+e*.25],[x,ey-e*.45],[x+s*.09,ey+e*.25]];
+    if(kind==='laugh'){out.push({pts:hat(lx),name:'左眼'});out.push({pts:hat(rx),name:'右眼'});
+      const m=[[cx-s*.24,cy+s*.06],...arc(cx,cy+s*.06,s*.24,Math.PI,0,18).reverse().map(p=>[p[0],cy+s*.06+(cy+s*.06-p[1])*-.9]),[cx-s*.24,cy+s*.06]];out.push({pts:m,name:'張口大笑'})}
+    else{out.push({pts:dot(lx,ey,e),name:'左眼'});out.push({pts:kind==='wink'?hat(rx):dot(rx,ey,e),name:kind==='wink'?'眨眼':'右眼'});
+      out.push({pts:arc(cx,cy+s*.02,s*.26,Math.PI*.85,Math.PI*.15,16,.85),name:'微笑嘴巴'})}};
+  switch(type){
+    case'heart':{const a=[];for(let i=0;i<=44;i++){const t=Math.PI*2*i/44,x=16*Math.pow(Math.sin(t),3),y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);a.push([cx+x*s/34,cy-(y+2.5)*s/34])}out.push({pts:a,name:'愛心'});break}
+    case'star':{const a=[];for(let k=0;k<=5;k++){const g=-Math.PI/2+k*Math.PI*.8;a.push([cx+Math.cos(g)*R,cy+Math.sin(g)*R])}out.push({pts:a,name:'星星'});break}
+    case'sparkle':{const a=[];for(let i=0;i<=48;i++){const g=-Math.PI/2+i/48*Math.PI*2,rr=R*(.3+.7*Math.pow(Math.abs(Math.cos(2*g)),1.8));a.push([cx+Math.cos(g)*rr,cy+Math.sin(g)*rr])}out.push({pts:a,name:'閃亮星芒'});break}
+    case'smile':case'wink':case'laugh':face(type,true);break;
+    case'eyes:smile':face('smile',false);break;case'eyes:wink':face('wink',false);break;case'eyes:laugh':face('laugh',false);break;
+    case'note':{out.push({pts:arc(cx-s*.14,cy+s*.28,s*.15,-.4,-.4-Math.PI*2.05,28,.72),name:'音符的符頭'});
+      out.push({pts:[[cx+.01*s,cy+s*.25],[cx+.01*s,cy-s*.45],...bez([cx+.01*s,cy-s*.45],[cx+s*.1,cy-s*.3],[cx+s*.32,cy-s*.25],[cx+s*.26,cy-s*.02],10)],name:'符桿與符尾'});break}
+    case'sun':{out.push({pts:arc(cx,cy,s*.24,-Math.PI/2,-Math.PI/2-Math.PI*2.02,34),name:'太陽'});
+      const a=[];for(let i=0;i<=16;i++){const g=-Math.PI/2+i/16*Math.PI*2,rr=i%2?s*.34:s*.5;a.push([cx+Math.cos(g)*rr,cy+Math.sin(g)*rr])}out.push({pts:a,name:'光芒'});break}
+    case'moon':{const a=arc(cx,cy,R,-Math.PI*.4,-Math.PI*1.6,30),b=arc(cx+R*.4,cy,R*.78,Math.PI*.58,Math.PI*1.42,26);out.push({pts:[...a,...b.slice(1),a[0]],name:'月亮'});break}
+    case'flower':{const a=[];for(let i=0;i<=120;i++){const g=i/120*Math.PI*2,rr=R*Math.abs(Math.cos(2.5*g));a.push([cx+Math.cos(g-Math.PI/2)*rr,cy+Math.sin(g-Math.PI/2)*rr])}out.push({pts:a,name:'花瓣'});out.push({pts:dot(cx,cy,s*.14),name:'花心'});break}
+    case'crown':{const w=s,h=s*.62;out.push({pts:[[cx-w/2,cy+h/2],[cx-w/2,cy-h/2],[cx-w/4,cy+h*.05],[cx,cy-h*.62],[cx+w/4,cy+h*.05],[cx+w/2,cy-h/2],[cx+w/2,cy+h/2],[cx-w/2,cy+h/2]],name:'皇冠'});break}
+    case'infinity':{const a=[];for(let i=0;i<=60;i++){const t=i/60*Math.PI*2,d=1+Math.sin(t)**2;a.push([cx+R*1.1*Math.cos(t)/d,cy+R*1.1*Math.sin(t)*Math.cos(t)/d])}out.push({pts:a,name:'無限符號'});break}
+    case'bolt':out.push({pts:[[cx+s*.12,cy-R],[cx-s*.2,cy+s*.05],[cx+s*.08,cy+s*.05],[cx-s*.14,cy+R]],name:'閃電'});break;
+    case'check':out.push({pts:[[cx-R*.8,cy],[cx-R*.2,cy+R*.6],[cx+R*.9,cy-R*.7]],name:'勾勾'});break;
+    case'wave':{const a=[];for(let i=0;i<=40;i++){const u=i/40;a.push([cx-R+u*s,cy+Math.sin(u*Math.PI*3)*s*.14])}out.push({pts:a,name:'波浪'});break}
+    case'plus':out.push({pts:[[cx-R*.6,cy],[cx+R*.6,cy]],name:'加號橫'});out.push({pts:[[cx,cy-R*.6],[cx,cy+R*.6]],name:'加號直'});break;
+    default:return doodle('star',cx,cy,s);
+  }
+  return out}
+// symbols typed inside a name: emoji, dingbats and text emoticons
+const SYM_MAP=[['^_^','laugh'],[':-)','smile'],['<3','heart'],[':)','smile'],[';)','wink'],[':D','laugh'],['^^','laugh'],['♡','heart'],['♥','heart'],['❤','heart'],['💕','heart'],['💖','heart'],['💗','heart'],['😍','heart'],['☆','star'],['★','star'],['⭐','star'],['🌟','sparkle'],['✦','sparkle'],['✧','sparkle'],['✨','sparkle'],['☺','smile'],['😊','smile'],['🙂','smile'],['😀','laugh'],['😄','laugh'],['😆','laugh'],['😁','laugh'],['😉','wink'],['😜','wink'],['♪','note'],['♫','note'],['🎵','note'],['🎶','note'],['☀','sun'],['🌞','sun'],['☾','moon'],['🌙','moon'],['✿','flower'],['❀','flower'],['🌸','flower'],['🌼','flower'],['👑','crown'],['♛','crown'],['∞','infinity'],['⚡','bolt'],['✓','check'],['✔','check'],['～','wave'],['~','wave'],['+','plus']];
+function tokenize(s){
+  const out=[];let i=0;
+  while(i<s.length){
+    const m=SYM_MAP.find(([k])=>s.startsWith(k,i));
+    if(m){out.push({t:'sym',v:m[1],raw:m[0]});i+=m[0].length;if(s[i]==='️')i++;continue}
+    const cp=s.codePointAt(i),ch=String.fromCodePoint(cp);i+=ch.length;
+    if(ch==='️'||ch==='‍')continue;
+    if(/\s/.test(ch))out.push({t:'sp'});
+    else if(/[A-Za-z]/.test(ch))out.push({t:'L',c:ch});
+    else if(/[0-9]/.test(ch))out.push({t:'D',c:ch});
+    else if(isCJK(ch))out.push({t:'C',c:ch});
+    else if(/[.\-_'!?&,]/.test(ch))out.push({t:'P',c:ch});
+    else if(/\p{Extended_Pictographic}/u.test(ch))out.push({t:'sym',v:'sparkle',raw:ch,unknown:true});
+    else out.push({t:'X',c:ch});
+  }
+  return out}
+
+function buildLatin(opts){
+  const base=STYLES[opts.style],M=opts.m??1,H=HANDS[base.hand];
+  const st={...base,slant:Math.tan(opts.slant*Math.PI/180),cap:opts.cap,sw:opts.sw,wm:(base.wm||1)*opts.w,jit:base.jit*M};
+  const r=rng(opts.seed*9973+opts.style.charCodeAt(0)*131+opts.style.length*31+7);
+  const ph=[r()*6.28,r()*6.28,r()*6.28,r()*6.28],dm=opts.seed?M:0;
+  const riseV=st.rise+dm*gauss(r)*.02,rot=dm*gauss(r)*.02,sinA=dm*.5,sinF=.04+r()*.04;
+  const fType=st.flourish.length?st.flourish[opts.seed%st.flourish.length]:null;
+  let words=[[]];tokenize(opts.name||'').forEach(tk=>{if(tk.t==='sp'){if(words.at(-1).length)words.push([])}else if(tk.t!=='C'&&tk.t!=='X')words.at(-1).push({...tk})});
+  words=words.filter(w=>w.length);if(!words.some(w=>w.some(x=>x.t==='L')))words.unshift([...'Signature'].map(c=>({t:'L',c})));
+  words.forEach(w=>{if(w[0].t==='L')w[0].c=w[0].c.toUpperCase()});const initDot=[];
+  const firstL=w=>w.find(x=>x.t==='L');
+  if(st.monogram){const ls=words.map(firstL).filter(Boolean);words=[ls.length>1?ls.map(x=>({t:'L',c:x.c.toUpperCase()})):[{t:'L',c:ls[0].c.toUpperCase()},...(words[0].filter(x=>x.t==='L').slice(1,2).map(x=>({t:'L',c:x.c.toUpperCase()})))]]}
+  else if(opts.initials&&words.filter(firstL).length>1){const last=words.map((w,i)=>firstL(w)?i:-1).filter(i=>i>=0).at(-1);words=words.map((w,i)=>{if(i<last&&firstL(w)){initDot[i]=true;return[firstL(w)]}return w})}
+  const emo=st.emote?st.emotes[opts.seed%st.emotes.length]:null;let usedO=0,crowned=false;const emoNotes=[];
+  const U=.03,strokes=[];let cursor=0,lastMainIdx=-1;
+  words.forEach((word,wi)=>{
+    const late=[];let prev=null,prevCh=null;const fl0=firstL(word);
+    word.forEach((tk,li)=>{
+      if(tk.t==='sym'){const sz=(wi===0&&li===0?15:12)*st.rest,cx=cursor+sz*.62,cy=-sz*.62+(r()-.5)*st.jit*.5,d=doodle(tk.v,cx,cy,sz);
+        d.forEach(q=>strokes.push({pts:q.pts.map(p=>[p[0],p[1],.5*st.wm]),kind:'doodle',dname:`寫入符號「${tk.raw}」${d.length>1?'：'+q.name:''}`,letters:[tk.raw]}));prev=null;prevCh=null;cursor+=sz*1.3;return}
+      const ch=tk.c==='_'?'-':tk.c===','?'.':tk.c;
+      const g=H.g[ch];if(!g)return;const[adv,gs]=g,isCap=ch>='A'&&ch<='Z',big=(tk===fl0&&isCap)||(st.monogram&&isCap);
+      const s=(big?(wi===0&&li===0?st.cap:1+(st.cap-1)*.7):st.rest)*(1+(r()-.5)*st.jit*.1);
+      if(prevCh)cursor+=(H.k[prevCh+ch]||0)*U*st.sx*s;
+      const flat=big?1:st.flat,dy=(r()-.5)*st.jit*.7;let joined=false;
+      const place=stk=>stk.map(([x,y,rr])=>[cursor+x*U*s*st.sx,y*U*s*flat+dy,rr/10*U*s*(.6+.4*flat)*st.wm]);
+      if(emo&&(ch==='o'||ch==='O')&&usedO<2){const all=gs.flatMap(place),bb=bbox(all),c=[bb.minX+bb.w*.5,bb.minY+bb.h*.5],sz=Math.min(bb.w,bb.h);usedO++;
+        if(emo==='heart'){const rr=all[0][2],hp=doodle('heart',c[0],c[1],sz*1.15)[0].pts.map(p=>[p[0],p[1],rr]),exit=all.at(-1);
+          if(prev){prev.pts.push(...hp,exit);prev.letters.push(ch)}else{prev={pts:[...hp,exit],kind:'main',letters:[ch]};strokes.push(prev)}
+          prev.emo=(prev.emo||[]).concat(`把 ${ch} 寫成愛心`);cursor+=adv*U*s*st.sx*(big?st.capAdv:1);prevCh=ch;return}
+        const d=doodle('eyes:'+(emo==='wink'?'wink':emo==='star'?'laugh':'smile'),c[0],c[1]+sz*.04,sz*.78);
+        d.forEach(q=>late.push({pts:q.pts.map(p=>[p[0],p[1],all[0][2]*.55]),kind:'doodle',dname:`在 ${ch} 裡畫上${q.name}`,letters:[ch]}))}
+      if(emo&&big&&!crowned&&(emo==='star'||emo==='smile')){const all=gs.flatMap(place),bb=bbox(all);crowned=true;
+        doodle('crown',bb.minX+bb.w*.55,bb.minY-bb.h*.12,Math.max(3.5,bb.w*.42)).forEach(q=>late.push({pts:q.pts.map(p=>[p[0],p[1],all[0][2]*.7]),kind:'doodle',dname:`替 ${ch} 戴上皇冠`,letters:[ch]}))}
+      gs.forEach((stk,k)=>{
+        const pts=place(stk);
+        const bb=bbox(pts),small=bb.w<70*U*s&&bb.h<70*U*s&&gs.length>1;
+        const isDot=small&&(ch==='i'||ch==='j'),isCross=ch==='t'&&k>0&&bb.h<bb.w*.4;
+        if(isDot&&st.emote){const e=emo,c=[(bb.minX+bb.maxX)/2,(bb.minY+bb.maxY)/2-.6],rr=pts[0][2]*.8;
+          const d=doodle(e==='star'||e==='smile'?'star':'heart',c[0],c[1],3.2*s);d.forEach(q=>late.push({pts:q.pts.map(p=>[p[0],p[1],rr]),kind:'doodle',dname:`把 ${ch} 的點畫成${q.name}`,letters:[ch]}));return}
+        if(isDot||isCross){if(st.oneStroke&&st.dropLate)return;late.push({pts,kind:isDot?'dot':'cross',letters:[ch]});return}
+        if(prev&&hyp(prev.pts.at(-1),pts[0])<(k===0?2.2:1.2)){prev.pts.push(...pts.slice(1));if(!joined){prev.letters.push(ch);joined=true}return}
+        prev={pts,kind:'main',letters:[ch]};strokes.push(prev);joined=true;
+      });
+      cursor+=adv*U*s*st.sx*(big?st.capAdv:1);prevCh=ch;
+    });
+    if(prev)lastMainIdx=strokes.indexOf(prev);
+    if(initDot[wi]&&!(st.oneStroke&&st.dropLate)){const q=.7;late.push({pts:[[cursor+.5,-.6,q],[cursor+1.1,-.3,q],[cursor+.9,.4,q],[cursor+.4,.1,q]],kind:'period',letters:['.']});cursor+=3}
+    strokes.push(...late);cursor+=H.sp*U*st.rest*(st.space??1);
+  });
+  words=words.map(w=>w.map(x=>x.t==='sym'?x.raw:x.c).join(''));
+  const baseR=(()=>{const a=strokes.flatMap(s=>s.pts.map(p=>p[2])).sort((x,y)=>x-y);return a[a.length>>1]||.5})();
+  // global transform: extra slant, rising baseline, rotation, wobble
+  const J=st.jit,cr=Math.cos(rot),sr=Math.sin(rot);
+  for(const S of strokes)S.pts=S.pts.map(([x,y,rr])=>{let X=x-y*st.slant,Y=y-x*riseV;
+    Y+=J*(Math.sin(x*.09+ph[0])*.7+Math.sin(x*.031+ph[1])*1)+sinA*Math.sin(x*sinF+ph[3]);X+=J*Math.sin(y*.2+ph[2])*.3;return[X*cr-Y*sr,X*sr+Y*cr,rr]});
+  // one-stroke: join every stroke with a fast hairline connector
+  if(st.oneStroke&&strokes.length>1){const M0=strokes[0];let links=0;
+    for(let i=1;i<strokes.length;i++){const S=strokes[i],a=M0.pts.at(-1),a0=M0.pts[Math.max(0,M0.pts.length-3)],b=S.pts[0],b1=S.pts[Math.min(S.pts.length-1,2)],g=hyp(a,b);
+      if(g>.8){const na=hyp(a0,a)||1,nb=hyp(b,b1)||1,c1=[a[0]+(a[0]-a0[0])/na*g*.4,a[1]+(a[1]-a0[1])/na*g*.4-g*.12],c2=[b[0]-(b1[0]-b[0])/nb*g*.4,b[1]-(b1[1]-b[1])/nb*g*.4-g*.12];
+        M0.pts.push(...bez(a,c1,c2,b,Math.max(3,Math.ceil(g/1.2))).slice(0,-1).map(p=>[p[0],p[1],NaN]))}
+      M0.pts.push(...S.pts);M0.letters.push(...S.letters);links++}
+    strokes.length=1;M0.oneAll=true;M0.links=links;lastMainIdx=0}
+  // flourish: exactly one closing stroke
+  const all=strokes.flatMap(s=>s.pts),B=bbox(all),W=B.w,k=st.sw;
+  const uy=x=>-x*riseV+B.maxY*.35+3+2*k;
+  if(k>.02&&fType&&lastMainIdx>=0){
+    const LM=strokes[lastMainIdx],E=LM.pts.at(-1),F=-1,sep=(pts,kind)=>strokes.push({pts:pts.map(p=>[p[0],p[1],F]),kind,letters:[]});
+    if(fType==='underline'){const p0=[B.minX+W*.04,uy(B.minX)+2*k],p3=[B.maxX+6*k,uy(B.maxX)-2*k];sep([p0,...bez(p0,[B.minX+W*.3,uy(B.minX)+4.5*k],[B.minX+W*.7,uy(B.maxX)+1],p3,40)],'underline')}
+    else if(fType==='double'){const p0=[B.minX+W*.02,uy(B.minX)+1.5*k],p3=[B.maxX+5*k,uy(B.maxX)-1*k];sep([p0,...bez(p0,[B.minX+W*.35,uy(B.minX)+3.5*k],[B.minX+W*.7,uy(B.maxX)+1],p3,36)],'underline');
+      const q0=[B.minX+W*.18,uy(B.minX)+4.5*k],q3=[B.maxX-W*.08,uy(B.maxX)+2.5*k];sep([q0,...bez(q0,[B.minX+W*.4,uy(B.minX)+6*k],[B.minX+W*.65,uy(B.maxX)+4*k],q3,30)],'underline2')}
+    else if(fType==='dash'){const p0=[B.minX+W*.12,B.minY+B.h*.45],p3=[B.maxX+6*k,B.minY+B.h*.33];sep([p0,...bez(p0,[B.minX+W*.4,p0[1]+1.5],[B.minX+W*.75,p3[1]+1],p3,30)],'dash')}
+    else if(fType==='oval'){const cx=B.minX+W/2,cy=B.minY+B.h/2,rx=W/2+5*k,ry=B.h/2+4*k,pts=[];for(let i=0;i<=90;i++){const a=.35-i/90*6.2832*1.1,rr=1+.05*i/90;pts.push([cx+Math.cos(a)*rx*rr-Math.sin(a)*ry*.1,cy+Math.sin(a)*ry*rr])}sep(pts,'oval')}
+    else{
+      const seq=[E];
+      if(fType==='sweep'){const yM=B.minY+B.h*.45;seq.push([E[0]+4*k,E[1]-4*k],[E[0]+1*k,E[1]-8*k],[E[0]-4*k,yM-1*k],[B.minX+W*.55,yM+1],[B.minX+W*.22,yM+2*k],[B.minX+W*.08,yM+6*k],[B.minX+W*.2,uy(B.minX)+2*k],[B.minX+W*.6,uy(B.minX+W*.6)+2.5*k],[B.maxX+7*k,uy(B.maxX)-1.5*k])}
+      else if(fType==='ring'){const cx=B.minX+W/2,cy=B.minY+B.h/2,rx=W/2+5*k,ry=B.h/2+4.5*k,a0=Math.atan2((E[1]-cy)/ry,(E[0]-cx)/rx)+.35;for(let i=0;i<=80;i++){const a=a0+i/80*6.2832*1.05,rr=1+.07*i/80;seq.push([cx+Math.cos(a)*rx*rr,cy+Math.sin(a)*ry*rr])}const q=seq.at(-1);seq.push([q[0]+5*k,q[1]-3*k])}
+      else if(fType==='paraphC'){seq.push([E[0]+4*k,E[1]+4*k],[B.minX+W*.1,uy(B.minX)+3*k],[B.maxX-W*.05,uy(B.maxX)+5.5*k],[B.minX+W*.22,uy(B.minX)+8.5*k],[B.maxX-W*.2,uy(B.maxX)+10*k],[B.minX+W*.42,uy(B.minX)+11.5*k])}
+      else{if(fType==='loopTail')seq.push([E[0]+3*k,E[1]-5*k],[E[0]+1.5*k,E[1]-10*k],[E[0]-2*k,E[1]-7*k],[E[0]+.5*k,E[1]-1.5*k]);
+        const s0=seq.at(-1),p3=[B.minX+W*Math.max(.05,.42-.22*k),uy(B.minX)+3*k];seq.push(...bez(s0,[s0[0]+10*k,s0[1]+9*k],[B.maxX-W*.12,uy(B.maxX)+7*k],p3,48),[p3[0]-6*k,p3[1]-2.5*k])}
+      const sm=spline(seq.map(p=>[p[0],p[1]]),.5);LM.pts.push(...sm.slice(1).map(p=>[p[0],p[1],F]));LM.flourish=fType;
+      let fl=0;for(let i=1;i<sm.length;i++)fl+=hyp(sm[i-1],sm[i]);LM.flLen=fl;
+    }
+  }
+  if(emo){const T=[...strokes].reverse().find(s=>s.flourish||['underline','underline2','dash','oval'].includes(s.kind));
+    if(T){const E=T.pts.at(-1),typ=emo==='star'||emo==='smile'?'star':'heart',d=doodle(typ,0,0,5.5)[0].pts,o=[E[0]-d[0][0],E[1]-d[0][1]];
+      T.pts.push(...d.slice(1).map(p=>[p[0]+o[0],p[1]+o[1],baseR*.5]));T.flEmote=SYM_ZH[typ]}}
+  const sens=st.pen==='mono'?0:.12;
+  for(const S of strokes){
+    S.pts=fillR(resampleR(S.pts,.35),baseR);
+    kinematics(S);
+    const n=S.pts.length;
+    let w=S.pts.map((p,i)=>{const ink=clamp(Math.pow(1/Math.max(.25,S.v[i]),sens),.8,1.25);return st.pen==='mono'?baseR*2*.95:p[2]*2*ink});
+    for(let pass=0;pass<2;pass++)w=w.map((x,i)=>(w[Math.max(0,i-1)]+2*x+w[Math.min(n-1,i+1)])/4);
+    if(st.pen==='mono'){const tA=Math.min(S.len*.1,1);w=w.map((x,i)=>x*(.55+.45*smooth(Math.min(S.cum[i],S.len-S.cum[i])/tA)))}
+    S.w=w;S.pts=S.pts.map(p=>[p[0],p[1]]);
+  }
+  const allP=strokes.flatMap(s=>s.pts);
+  return{strokes,box:bbox(allP),maxW:Math.max(...strokes.flatMap(s=>s.w)),fType,words,pen:'font',styleKey:opts.style,slantDeg:opts.slant,capRatio:st.cap/(st.rest||1),
+    lift:(a,b)=>.12+Math.min(.45,hyp(a,b)/140)};
+}
+function build(opts){
+  if(!opts.cn)return buildLatin(opts);
+  return STYLES[opts.style].outline?buildCNOut(opts):buildCN(opts);
+}
+
+/* ============ Chinese engine (stroke medians from Make Me a Hanzi / Hanzi Writer data) ============ */
+const HZ={},hzShards={};
+const isCJK=c=>/[\u3400-\u9fff]/.test(c);
+const shardOf=c=>c.codePointAt(0)%97;
+function hzReady(chars){return chars.every(c=>hzShards[shardOf(c)]===true)}
+function loadChars(chars){return Promise.all([...new Set(chars.map(shardOf))].map(k=>{if(hzShards[k]===true)return null;if(!hzShards[k])hzShards[k]=fetch(`hz/h${k}.json`).then(r=>{if(!r.ok)throw new Error('http');return r.json()}).then(d=>{Object.assign(HZ,d);hzShards[k]=true}).catch(e=>{delete hzShards[k];throw e});return hzShards[k]}))}
+const B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_',B64i={};[...B64].forEach((c,i)=>B64i[c]=i);
+const hzCache={};
+function decodeHZ(ch){if(hzCache[ch])return hzCache[ch];const s=HZ[ch][0];return hzCache[ch]=s.split(',').map(st=>{const pts=[];for(let i=0;i+3<st.length;i+=4)pts.push([B64i[st[i]]*64+B64i[st[i+1]]-256,B64i[st[i+2]]*64+B64i[st[i+3]]-256]);return pts})}
+function pathLen(P){let L=0;for(let i=1;i<P.length;i++)L+=hyp(P[i-1],P[i]);return L}
+function sealText(chars){const n=chars.length;if(n<=1)return chars[0]||'印';if(n===2)return chars.join('')+'之印';if(n===3)return chars.join('')+'印';return chars.slice(0,4).join('')}
+function brushProfile(type,u){switch(type){
+  case'heng':return .82+.42*Math.exp(-u*u/.004)+.38*Math.exp(-(1-u)*(1-u)/.006);
+  case'shu':return .9+.4*Math.exp(-u*u/.004)+.3*Math.exp(-(1-u)*(1-u)/.006);
+  case'shuT':return(.95+.4*Math.exp(-u*u/.004))*(u>.72?Math.max(.12,1-(u-.72)/.28):1);
+  case'pie':return Math.max(.1,1.25-1.1*Math.pow(u,1.1));
+  case'na':return u<.78?.45+.95*u/.78:Math.max(.15,1.4-(u-.78)/.22*1.25);
+  case'dian':return .45+Math.sin(Math.PI*Math.min(1,u*1.1));
+  case'fl':return u<.55?1:Math.max(.08,1-(u-.55)/.45);
+  default:return(.9+.35*Math.exp(-u*u/.004))*(u>.85?Math.max(.2,1-(u-.85)/.15*.7):1)}}
+function cnItems(name){
+  let items=tokenize(name||'').filter(t=>(t.t==='C'&&HZ[t.c])||t.t==='sym'||(t.t==='D'&&HANDS));
+  if(!items.some(t=>t.t==='C'))items=[...items,...['簽','名'].filter(c=>HZ[c]).map(c=>({t:'C',c}))];
+  return items}
+// a typed symbol or digit inside a Chinese name, laid out like a small character (local units, pre-transform)
+function cnSymbolPieces(it,ox,oy,size,vertical){
+  const sz=size*.62,cx=ox+size*(vertical?.5:.36),cy=oy+size*.5;
+  if(it.t==='sym')return doodle(it.v,cx,cy,sz).map(q=>({pts:q.pts,dname:`寫入符號「${it.raw}」${q.name!==SYM_ZH[it.v]?'：'+q.name:''}`}));
+  const g=HANDS['ms-madi'].g[it.c];if(!g)return[];const u=size*.00085;
+  return g[1].map(stk=>({pts:stk.map(([x,y])=>[ox+size*.08+x*u,oy+size*.82+y*u]),dname:`寫數字 ${it.c}`}));
+}
+// replace 口 components and dots with symbols, keeping stroke order
+function cnEmbedSymbols(pieces,emo){
+  const rep=new Map(),byCi={};let boxes=0,dots=0;
+  pieces.forEach((p,i)=>{if(p.type!=='doodle')(byCi[p.ci]=byCi[p.ci]||[]).push(i)});
+  for(const ci in byCi){const ids=byCi[ci];
+    for(let j=0;j+2<ids.length&&boxes<2;j++){const a=pieces[ids[j]],b=pieces[ids[j+1]],c=pieces[ids[j+2]],bb=bbox([...a.pts,...b.pts,...c.pts]),sz=a.size;
+      const va=[a.pts.at(-1)[0]-a.pts[0][0],a.pts.at(-1)[1]-a.pts[0][1]],vc=[c.pts.at(-1)[0]-c.pts[0][0],c.pts.at(-1)[1]-c.pts[0][1]];
+      const ok=bb.w<sz*.62&&bb.h<sz*.55&&bb.w>sz*.12&&bb.h>sz*.1&&Math.abs(va[0])<Math.abs(va[1])*.7&&hyp(a.pts[0],b.pts[0])<sz*.12&&b.type==='zhe'&&Math.abs(vc[1])<Math.abs(vc[0])*.6&&c.pts[0][1]>bb.minY+bb.h*.5;
+      if(!ok)continue;
+      const kind=emo==='heart'?'heart':emo==='wink'?'wink':emo==='star'?'laugh':'smile',d=doodle(kind,bb.minX+bb.w/2,bb.minY+bb.h/2,Math.min(bb.w,bb.h)*1.08);
+      rep.set(ids[j],d.map((q,qi)=>({...a,si:a.si+qi*.01,pts:spline(q.pts,.35),type:'doodle',dname:`把「${a.ch}」的口畫成${q.name}`})));rep.set(ids[j+1],[]);rep.set(ids[j+2],[]);boxes++;j+=2}}
+  pieces.forEach((p,i)=>{if(rep.has(i)||p.type!=='dian'||dots>=3)return;const bb=bbox(p.pts);dots++;
+    const d=doodle(emo==='star'||emo==='smile'?'star':'heart',bb.minX+bb.w/2,bb.minY+bb.h/2,p.size*.16);rep.set(i,d.map(q=>({...p,pts:spline(q.pts,.35),type:'doodle',dname:`把「${p.ch}」的點畫成${q.name}`})))});
+  return pieces.flatMap((p,i)=>rep.has(i)?rep.get(i):[p]);
+}
+function buildCN(opts){
+  const base=STYLES[opts.style],M=opts.m??1;
+  const st={...base,slant:Math.tan(opts.slant*Math.PI/180),cap:opts.cap,sw:opts.sw,w:base.w*opts.w,jit:base.jit*M,link:opts.link??base.link,simplify:opts.simplify??base.simplify};
+  const r=rng(opts.seed*7919+opts.style.charCodeAt(0)*131+opts.style.length*17+3);
+  const ph=[r()*6.28,r()*6.28,r()*6.28,r()*6.28],dm=opts.seed?M:0;
+  const riseV=st.rise+dm*gauss(r)*.02,rot=dm*gauss(r)*.03,sinA=dm*.5,sinF=.04+r()*.04;
+  const items=cnItems(opts.name),chars=items.map(it=>it.c||it.raw),sealChars=items.filter(it=>it.t==='C').map(it=>it.c);
+  const U=30/512;let pieces=[];let cursor=0;const emo=st.emote?st.emotes[opts.seed%st.emotes.length]:null;
+  items.forEach((it,ci)=>{const ch=it.c||it.raw;
+    const s=(ci===0&&it.t==='C'?st.cap:st.rest)*(1+(r()-.5)*st.jit*.1),size=512*U*s;
+    let ox,oy;
+    if(st.vertical){ox=-size/2+(r()-.5)*st.jit*2;oy=cursor;cursor+=size*st.track*(it.t==='C'?1:.7)}
+    else{ox=cursor;oy=-size+(ci>0?(st.cap-s)*512*U*st.drop:0)+(r()-.5)*st.jit*1.5;cursor+=size*st.track*(it.t==='C'?1:.72)}
+    if(it.t!=='C'){cnSymbolPieces(it,ox,oy,size,st.vertical).forEach((q,si)=>pieces.push({pts:spline(q.pts,.35),ci,si,type:'doodle',ch,size,dname:q.dname}));return}
+    const crot=(r()-.5)*st.jit*.08,clear=ci===0&&st.firstClear,simp=clear?0:st.simplify;
+    decodeHZ(ch).forEach((raw,si)=>{
+      let pts=raw.map(([x,y])=>{const X=x-256,Y=y-256;return[ox+(X*Math.cos(crot)-Y*Math.sin(crot)+256)*U*s,oy+(X*Math.sin(crot)+Y*Math.cos(crot)+256)*U*s]});
+      pts=spline(pts,.35);
+      const k=Math.round(simp*10);
+      if(k>0&&pts.length>4)for(let pass=0;pass<2;pass++){const q=pts;pts=q.map((p,i)=>{if(i===0||i===q.length-1)return p;let sx=0,sy=0,c=0;for(let j=Math.max(0,i-k);j<=Math.min(q.length-1,i+k);j++){sx+=q[j][0];sy+=q[j][1];c++}return[sx/c,sy/c]})}
+      if(simp>0){const bb=bbox(pts),cx=bb.minX+bb.w/2,cy=bb.minY+bb.h/2,f=1-.18*simp;pts=pts.map(p=>[cx+(p[0]-cx)*f,cy+(p[1]-cy)*f])}
+      const d=[pts.at(-1)[0]-pts[0][0],pts.at(-1)[1]-pts[0][1]],len=pathLen(pts);
+      let type='zhe';
+      if(len<size*.16)type='dian';
+      else{const straight=Math.hypot(d[0],d[1])/Math.max(len,1e-3);
+        if(straight>.85){if(Math.abs(d[1])<Math.abs(d[0])*.4)type='heng';else if(Math.abs(d[0])<Math.abs(d[1])*.35)type=r()<.5?'shu':'shuT';else type=d[0]<0?'pie':'na'}
+        else if(d[0]<0&&d[1]>0&&straight>.6)type='pie'}
+      pieces.push({pts,ci,si,type,ch,size,clear});
+    });
+  });
+  if(emo)pieces=cnEmbedSymbols(pieces,emo);
+  // global transform
+  const J=st.jit,cr=Math.cos(rot),sr=Math.sin(rot);
+  const tf=([x,y])=>{let X=x-y*st.slant,Y=y-x*riseV;Y+=J*(Math.sin(x*.09+ph[0])*.9+Math.sin(x*.031+ph[1])*1.2)+sinA*Math.sin(x*sinF+ph[3]);X+=J*Math.sin(y*.18+ph[2])*.4;return[X*cr-Y*sr,X*sr+Y*cr]};
+  pieces.forEach(P=>P.pts=P.pts.map(tf));
+  // link strokes (牽絲) into continuous pen paths
+  const strokes=[];let cur=null;
+  const add=(S,p,m,t,u)=>{S.pts.push(p);S.mask.push(m);S.ptype.push(t);S.pu.push(u)};
+  pieces.forEach((P,i)=>{
+    const prev=pieces[i-1];let link=false;
+    if(cur&&prev){const same=prev.ci===P.ci,gap=hyp(prev.pts.at(-1),P.pts[0]);
+      if(st.oneStroke)link=true;else if(same)link=r()<(P.clear?.12:st.link)&&gap<P.size*.95;else link=r()<Math.min(st.linkX,st.link+.1)&&gap<P.size*1.6}
+    if(link){const a=prev.pts.at(-1),a0=prev.pts[Math.max(0,prev.pts.length-4)],b=P.pts[0],b1=P.pts[Math.min(P.pts.length-1,3)],g=hyp(a,b);
+      const na=Math.hypot(a[0]-a0[0],a[1]-a0[1])||1,nb=Math.hypot(b1[0]-b[0],b1[1]-b[1])||1;
+      const cf=st.oneStroke?.3:.45,c1=[a[0]+(a[0]-a0[0])/na*g*cf,a[1]+(a[1]-a0[1])/na*g*cf],c2=[b[0]-(b1[0]-b[0])/nb*g*cf,b[1]-(b1[1]-b[1])/nb*g*cf];
+      bez(a,c1,c2,b,Math.max(4,Math.ceil(g/.35))).slice(0,-1).forEach(p=>add(cur,p,1,null,0));cur.links++}
+    else{cur={pts:[],mask:[],ptype:[],pu:[],kind:'main',cn:true,strokeIdx:[],links:0,letters:[]};strokes.push(cur)}
+    const L=pathLen(P.pts);let acc=0;
+    P.pts.forEach((p,j)=>{if(j)acc+=hyp(P.pts[j-1],p);add(cur,p,0,P.type,L?acc/L:0)});
+    cur.strokeIdx.push([P.ci,P.si]);if(P.dname)(cur.emo=cur.emo||[]).push(P.dname);
+  });
+  // flourish
+  let B=bbox(strokes.flatMap(s=>s.pts));const W=B.w,k=st.sw*1.2,fType=st.flourish.length?st.flourish[opts.seed%st.flourish.length]:null;
+  if(k>.02&&fType&&strokes.length){
+    if(fType==='underline'){const y=B.maxY+1.5*k,p0=[B.minX+W*.05,y+1.5*k],p3=[B.maxX+5*k,y-2*k],pts=[p0,...bez(p0,[B.minX+W*.3,y+3*k],[B.minX+W*.7,y+.5],p3,40)],L=pathLen(pts);
+      const S={pts:[],mask:[],ptype:[],pu:[],kind:'underline',cn:true,strokeIdx:[],links:0,letters:[]};let acc=0;pts.forEach((p,j)=>{if(j)acc+=hyp(pts[j-1],p);add(S,p,0,'fl',acc/L)});strokes.push(S)}
+    else if(fType==='ring'){const LM=strokes.at(-1),E=LM.pts.at(-1),seq=[E],cx=B.minX+W/2,cy=B.minY+B.h/2,rx=W/2+5*k,ry=B.h/2+4*k,a0=Math.atan2((E[1]-cy)/ry,(E[0]-cx)/rx)+.35;
+      for(let i=0;i<=90;i++){const a=a0+i/90*6.2832*1.05,rr=1+.07*i/90;seq.push([cx+Math.cos(a)*rx*rr,cy+Math.sin(a)*ry*rr])}const q=seq.at(-1);seq.push([q[0]+5*k,q[1]-3*k]);
+      const sm=spline(seq,.35),L=pathLen(sm);let acc=0;sm.forEach((p,j)=>{if(j){acc+=hyp(sm[j-1],p);add(LM,p,0,'fl',.55*acc/L+(acc/L>.9?(acc/L-.9)*4.5:0))}});LM.flourish='ring'}
+    else{const LM=strokes.at(-1),E=LM.pts.at(-1),seq=[E];
+      if(fType==='loopTail')seq.push([E[0]+3*k,E[1]-5*k],[E[0]+1.5*k,E[1]-10*k],[E[0]-2*k,E[1]-7*k],[E[0]+.5*k,E[1]-1.5*k]);
+      const s0=seq.at(-1),p3=[B.minX+W*Math.max(.05,.4-.2*k),B.maxY+3*k];
+      seq.push(...bez(s0,[s0[0]+10*k,s0[1]+8*k],[B.maxX-W*.1,B.maxY+6*k],p3,48),[p3[0]-6*k,p3[1]-2.5*k]);
+      const sm=spline(seq,.35),L=pathLen(sm);let acc=0;sm.forEach((p,j)=>{if(j){acc+=hyp(sm[j-1],p);add(LM,p,0,'fl',acc/L)}});LM.flourish=fType}
+  }
+  if(emo&&strokes.length){const T=[...strokes].reverse().find(s=>s.flourish||s.kind==='underline');
+    if(T){const E=T.pts.at(-1),typ=emo==='star'||emo==='smile'?'star':'heart',d=spline(doodle(typ,0,0,6)[0].pts,.35),o=[E[0]-d[0][0],E[1]-d[0][1]];
+      d.slice(1).forEach(p=>add(T,[p[0]+o[0],p[1]+o[1]],0,'doodle',.5));T.flEmote=SYM_ZH[typ]}}
+  // kinematics + brush widths
+  const sens=st.pen==='penCN'?.35:.3;
+  for(const S of strokes){
+    const P=S.pts,n=P.length,cum=[0];for(let i=1;i<n;i++)cum.push(cum[i-1]+hyp(P[i-1],P[i]));
+    const L=cum[n-1]||.01;S.len=L;S.cum=cum;
+    let v=P.map((p,i)=>{const a=P[Math.max(0,i-3)],c=P[Math.min(n-1,i+3)],d1=[p[0]-a[0],p[1]-a[1]],d2=[c[0]-p[0],c[1]-p[1]],ds=Math.hypot(...d1)+Math.hypot(...d2);
+      if(ds<1e-3)return 1;return Math.pow(Math.abs(Math.atan2(d1[0]*d2[1]-d1[1]*d2[0],d1[0]*d2[0]+d1[1]*d2[1]))/ds+.03,-1/3)});
+    const med=[...v].sort((a,b)=>a-b)[n>>1]||1;v=v.map(x=>clamp(x/med,.35,2.2));
+    for(let pass=0;pass<2;pass++)v=v.map((x,i)=>(v[Math.max(0,i-3)]+v[Math.max(0,i-1)]+2*x+v[Math.min(n-1,i+1)]+v[Math.min(n-1,i+3)])/6);
+    const eA=Math.min(2,L*.2),eB=Math.min(3,L*.3);
+    v=v.map((x,i)=>{const s=cum[i];let env=L<8?.25+Math.exp(-Math.pow(Math.log(clamp(s/L,.01,.99)/.38),2)/(2*.3)):Math.min(.25+.75*smooth(s/eA),.2+.8*smooth((L-s)/eB));
+      return x*env*(S.mask[i]?1.7:S.ptype[i]==='fl'?1.5:1)});
+    S.v=v;const t=[0];for(let i=1;i<n;i++)t.push(t[i-1]+(cum[i]-cum[i-1])/(V0*Math.max(.12,(v[i-1]+v[i])/2)));S.t=t;S.dur=t[n-1]||.05;
+    let w=P.map((p,i)=>{const ink=clamp(Math.pow(1/Math.max(.2,v[i]),sens),.6,1.5);
+      if(S.mask[i])return st.w*(st.pen==='penCN'?.5:.09);
+      const u=S.pu[i],ty=S.ptype[i];
+      if(st.pen==='penCN')return st.w*(ty==='fl'?brushProfile('fl',u):.72+.28*smooth(Math.min(u,1-u)*8))*ink;
+      return st.w*brushProfile(ty,u)*ink});
+    for(let pass=0;pass<2;pass++)w=w.map((x,i)=>(w[Math.max(0,i-1)]+x*2+w[Math.min(n-1,i+1)])/4);
+    S.w=w;
+  }
+  B=bbox(strokes.flatMap(s=>s.pts));
+  let seal=null;
+  if(opts.seal&&sealChars.length){const text=sealText(sealChars),sz=clamp(B.h*(st.vertical?.14:.4),7,14);
+    seal=st.vertical?{x:B.minX+B.w/2-sz/2,y:B.maxY+4,s:sz,text,rot:(r()-.5)*.05}:{x:B.maxX+3,y:B.maxY-sz*.9,s:sz,text,rot:(r()-.5)*.06};
+    B=bbox([...strokes.flatMap(s=>s.pts),[seal.x,seal.y],[seal.x+seal.s,seal.y+seal.s]])}
+  const counts=items.map((it,ci)=>pieces.filter(p=>p.ci===ci).length);
+  if(st.oneStroke&&strokes[0])strokes[0].oneAll=strokes.filter(s=>s.kind==='main').length===1;
+  return{strokes,box:B,maxW:Math.max(...strokes.flatMap(s=>s.w)),fType,words:[chars.join('')],chars,counts,pen:st.pen,cn:true,seal,styleKey:opts.style,slantDeg:opts.slant,capRatio:st.cap/(st.rest||1),
+    lift:(a,b)=>.12+Math.min(.45,hyp(a,b)/140)};
+}
+/* ============ Chinese · Kai stroke outlines revealed along stroke medians ============ */
+const mat=(m,n)=>[m[0]*n[0]+m[2]*n[1],m[1]*n[0]+m[3]*n[1],m[0]*n[2]+m[2]*n[3],m[1]*n[2]+m[3]*n[3],m[0]*n[4]+m[2]*n[5]+m[4],m[1]*n[4]+m[3]*n[5]+m[5]];
+const matP=(m,p)=>[m[0]*p[0]+m[2]*p[1]+m[4],m[1]*p[0]+m[3]*p[1]+m[5]];
+function buildCNOut(opts){
+  const base=STYLES[opts.style],M=opts.m??1;
+  const st={...base,slant:Math.tan(opts.slant*Math.PI/180),cap:opts.cap,sw:opts.sw,wm:opts.w,jit:base.jit*M,link:opts.link??base.link};
+  const r=rng(opts.seed*7919+opts.style.charCodeAt(0)*131+opts.style.length*17+5),dm=opts.seed?M:0;
+  const riseV=st.rise+dm*gauss(r)*.02,rot=dm*gauss(r)*.03;
+  const items=cnItems(opts.name),chars=items.map(it=>it.c||it.raw),sealChars=items.filter(it=>it.t==='C').map(it=>it.c);
+  const U=30/512,cr=Math.cos(rot),sr=Math.sin(rot);
+  const RG=mat([cr,sr,-sr,cr,0,0],[1,-riseV,-st.slant,1,0,0]),HWm=[.5,0,0,-.5,0,450];
+  const pieces=[];let cursor=0;
+  items.forEach((it,ci)=>{const ch=it.c||it.raw;
+    const s=(ci===0&&it.t==='C'?st.cap:st.rest)*(1+(r()-.5)*st.jit*.08),size=512*U*s,k=U*s;
+    let ox,oy;if(st.vertical){ox=-size/2+(r()-.5)*st.jit*1.5;oy=cursor;cursor+=size*st.track*(it.t==='C'?1:.7)}
+    else{ox=cursor;oy=-size+(ci>0?(st.cap-s)*512*U*st.drop:0)+(r()-.5)*st.jit*1.2;cursor+=size*st.track*(it.t==='C'?1:.72)}
+    if(it.t!=='C'){cnSymbolPieces(it,ox,oy,size,st.vertical).forEach((q,si)=>pieces.push({pts:spline(q.pts.map(p=>matP(RG,p)),.35),ci,si,ch,size,rw:78*k*1.3,dname:q.dname}));return}
+    const a=(r()-.5)*st.jit*.1,cc=Math.cos(a),cs=Math.sin(a);
+    const T=[k*cc,k*cs,-k*cs,k*cc,ox+k*(256-256*cc+256*cs),oy+k*(256-256*cs-256*cc)],C=mat(RG,T),full=mat(C,HWm);
+    const meds=decodeHZ(ch),outs=HZ[ch][1];
+    meds.forEach((m,si)=>{const pts=spline(m.map(p=>matP(C,p)),.35);pieces.push({pts,outline:outs[si],M:full,ci,si,ch,size,rw:78*k*1.3})});
+  });
+  const strokes=[];let cur=null;
+  const newS=()=>({pts:[],mask:[],ptype:[],pu:[],parts:[],kind:'main',cn:true,strokeIdx:[],links:0,letters:[]});
+  const push=(S,pts,m,type)=>{const L=pathLen(pts);let acc=0;pts.forEach((p,j)=>{if(j)acc+=hyp(pts[j-1],p);S.pts.push(p);S.mask.push(m);S.ptype.push(type);S.pu.push(L?acc/L:0)})};
+  pieces.forEach((P,i)=>{
+    const prev=pieces[i-1];let link=false;
+    if(cur&&prev){const same=prev.ci===P.ci,gap=hyp(prev.pts.at(-1),P.pts[0]);link=same?r()<st.link&&gap<P.size*.8:r()<st.linkX&&gap<P.size*1.3}
+    if(link){const a=prev.pts.at(-1),a0=prev.pts[Math.max(0,prev.pts.length-4)],b=P.pts[0],b1=P.pts[Math.min(P.pts.length-1,3)],g=hyp(a,b);
+      const na=hyp(a0,a)||1,nb=hyp(b,b1)||1,c1=[a[0]+(a[0]-a0[0])/na*g*.35,a[1]+(a[1]-a0[1])/na*g*.35],c2=[b[0]-(b1[0]-b[0])/nb*g*.35,b[1]-(b1[1]-b[1])/nb*g*.35];
+      const st0=cur.pts.length;push(cur,[a,...bez(a,c1,c2,b,Math.max(4,Math.ceil(g/.35))).slice(0,-1)],1,'link');cur.parts.push({kind:'pen',start:st0,end:cur.pts.length-1});cur.links++}
+    else{cur=newS();strokes.push(cur)}
+    const s0=cur.pts.length;
+    if(P.outline){push(cur,P.pts,0,'rev');cur.parts.push({kind:'rev',start:s0,end:cur.pts.length-1,outline:P.outline,M:P.M,rw:P.rw})}
+    else{push(cur,P.pts,3,'sym');cur.parts.push({kind:'pen',start:Math.max(0,s0-1),end:cur.pts.length-1});(cur.emo=cur.emo||[]).push(P.dname)}
+    cur.strokeIdx.push([P.ci,P.si]);
+  });
+  // one exaggerated closing stroke (主筆拖尾) or a long thread line
+  let B=bbox(strokes.flatMap(s=>s.pts));const W=B.w,k=st.sw*1.2,fType=st.flourish.length?st.flourish[opts.seed%st.flourish.length]:null;
+  const rw0=pieces.length?pieces.at(-1).rw:3;
+  if(k>.02&&fType&&strokes.length){
+    if(fType==='underline'||fType==='thread'){
+      const y=fType==='thread'?B.minY+B.h*.6:B.maxY+1.5*k,p0=fType==='thread'?[B.minX-3*k,y+1.5*k]:[B.minX+W*.05,y+1.5*k],p3=[B.maxX+6*k,y-(fType==='thread'?3:2)*k];
+      const pts=spline([p0,...bez(p0,[B.minX+W*.3,y+(fType==='thread'?.5:3)*k],[B.minX+W*.7,y-.5*k],p3,40)],.35),S=newS();S.kind=fType==='thread'?'thread':'underline';
+      push(S,pts,2,'fl');S.parts.push({kind:'pen',start:0,end:S.pts.length-1});strokes.push(S)}
+    else{const LM=strokes.at(-1),E=LM.pts.at(-1),Ep=LM.pts[Math.max(0,LM.pts.length-6)],dx=E[0]-Ep[0],dy=E[1]-Ep[1],dn=Math.hypot(dx,dy)||1;
+      const s0=LM.pts.length-1,seq=[E,[E[0]+dx/dn*4*k,E[1]+dy/dn*4*k]],p3=[B.minX+W*.35,B.maxY+3*k];
+      seq.push(...bez(seq[1],[seq[1][0]+8*k,seq[1][1]+7*k],[B.maxX-W*.1,B.maxY+5*k],p3,48),[p3[0]-6*k,p3[1]-2.5*k]);
+      const sm=spline(seq,.35);push(LM,sm.slice(1),2,'fl');LM.parts.push({kind:'pen',start:s0,end:LM.pts.length-1});LM.flourish='tail'}
+  }
+  for(const S of strokes){
+    kinematics(S);S.v=S.v.map((x,i)=>x*(S.mask[i]===1?1.7:S.mask[i]===2?1.4:1));
+    const t=[0];for(let i=1;i<S.pts.length;i++)t.push(t[i-1]+(S.cum[i]-S.cum[i-1])/(V0*Math.max(.12,(S.v[i-1]+S.v[i])/2)));S.t=t;S.dur=t.at(-1)||.05;
+    S.w=S.pts.map((p,i)=>S.mask[i]===3?rw0*.2*st.wm:S.mask[i]===1?rw0*.07*st.wm:S.mask[i]===2?rw0*(S.kind==='thread'?.26:.4)*st.wm*brushProfile('fl',S.pu[i]):rw0*.3);
+  }
+  B=bbox(strokes.flatMap(s=>s.pts));
+  let seal=null;
+  if(opts.seal&&sealChars.length){const text=sealText(sealChars),sz=clamp(B.h*(st.vertical?.14:.4),7,14);
+    seal=st.vertical?{x:B.minX+B.w/2-sz/2,y:B.maxY+4,s:sz,text,rot:(r()-.5)*.05}:{x:B.maxX+3,y:B.maxY-sz*.9,s:sz,text,rot:(r()-.5)*.06};
+    B=bbox([...strokes.flatMap(s=>s.pts),[seal.x,seal.y],[seal.x+seal.s,seal.y+seal.s]])}
+  const counts=items.map((it,ci)=>pieces.filter(p=>p.ci===ci).length);
+  return{strokes,box:B,maxW:Math.max(rw0*.6,...strokes.flatMap(s=>s.w)),fType,words:[chars.join('')],chars,counts,pen:'kai',cn:true,seal,styleKey:opts.style,slantDeg:opts.slant,capRatio:st.cap/(st.rest||1),
+    lift:(a,b)=>.12+Math.min(.45,hyp(a,b)/140)};
+}
+const p2dCache=new Map();
+function p2d(s){let p=p2dCache.get(s);if(!p){p=new Path2D(s);p2dCache.set(s,p)}return p}
+function drawOutline(ctx,S,i0,i1,v,color,opt={}){
+  const P=S.pts,last=P.length-1;i1=Math.min(i1,last);
+  ctx.fillStyle=color;ctx.strokeStyle=color;ctx.lineCap='round';ctx.lineJoin='round';
+  for(const part of S.parts){
+    const a=Math.max(i0,part.start+1),b=Math.min(i1,part.end),complete=i1>=part.end&&i0<=part.end+1;
+    if(part.kind==='rev'){
+      if(a>b&&!complete)continue;
+      const base=ctx.getTransform();ctx.save();ctx.transform(v.sc,0,0,v.sc,v.ox,v.oy);ctx.transform(...part.M);
+      if(complete){ctx.fill(p2d(part.outline))}
+      else if(!opt.glow){ctx.clip(p2d(part.outline));ctx.setTransform(base);ctx.transform(v.sc,0,0,v.sc,v.ox,v.oy);ctx.lineWidth=part.rw;ctx.beginPath();ctx.moveTo(P[a-1][0],P[a-1][1]);for(let j=a;j<=b;j++)ctx.lineTo(P[j][0],P[j][1]);ctx.stroke()}
+      ctx.restore();
+    }else{
+      for(let j=a;j<=b;j++){ctx.lineWidth=Math.max(.5,(S.w[j-1]+S.w[j])/2*v.sc*(opt.glow?1.6:1));ctx.beginPath();ctx.moveTo(v.ox+P[j-1][0]*v.sc,v.oy+P[j-1][1]*v.sc);ctx.lineTo(v.ox+P[j][0]*v.sc,v.oy+P[j][1]*v.sc);ctx.stroke()}
+    }
+  }
+}
+
+const sealCache={},sealFontsReady=new Set();
+function sealImage(text){
+  if(sealCache[text])return sealCache[text];
+  const N=320,m=10,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d'),rr=rng([...text].reduce((a,ch)=>a+ch.charCodeAt(0),0));
+  const pts=[];for(let i=0;i<40;i++){const u=i/10,side=Math.floor(u),f=u-side,L=N-2*m;let px,py;
+    if(side===0){px=m+f*L;py=m}else if(side===1){px=N-m;py=m+f*L}else if(side===2){px=N-m-f*L;py=N-m}else{px=m;py=N-m-f*L}pts.push([px+(rr()-.5)*5,py+(rr()-.5)*5])}
+  x.fillStyle='#B3261E';x.beginPath();x.moveTo(...pts[0]);pts.forEach(p=>x.lineTo(...p));x.closePath();x.fill();
+  const ch=[...text],n=ch.length,inner=N-2*m-30,o=m+15,h=inner/2;
+  const cells=n===1?[[o,o,inner,inner,0]]:n===2?[[o,o,inner,h,0],[o,o+h,inner,h,1]]:[[o+h,o,h,h,0],[o+h,o+h,h,h,1],[o,o,h,h,2],[o,o+h,h,h,3]];
+  x.fillStyle='#FFF4EC';
+  cells.forEach(([cx,cy,cw,chh,i])=>{const g=ch[i];if(!g)return;x.save();x.font='700 100px "Noto Serif TC","Songti TC","PMingLiU",serif';const mt=x.measureText(g);
+    const l=mt.actualBoundingBoxLeft||0,rgt=mt.actualBoundingBoxRight||mt.width||100,asc=mt.actualBoundingBoxAscent||88,des=mt.actualBoundingBoxDescent||12,pad=5;
+    x.translate(cx+pad,cy+pad);x.scale((cw-pad*2)/Math.max(1,l+rgt),(chh-pad*2)/Math.max(1,asc+des));x.fillText(g,l,asc);x.restore()});
+  x.globalCompositeOperation='destination-out';
+  for(let i=0;i<180;i++){x.beginPath();x.arc(rr()*N,rr()*N,.4+rr()*1.9,0,7);x.fill()}
+  for(let i=0;i<5;i++){const e=Math.floor(rr()*4),t=rr()*N,px=e===0?t:e===1?N-m:e===2?t:m,py=e===0?m:e===1?t:e===2?N-m:t;x.beginPath();x.arc(px,py,3+rr()*6,0,7);x.fill()}
+  return sealCache[text]=c;
+}
+function drawSeal(ctx,seal,v,a=1,pop=1){if(!seal)return;const img=sealImage(seal.text),s=seal.s*v.sc*pop,cx=v.ox+(seal.x+seal.s/2)*v.sc,cy=v.oy+(seal.y+seal.s/2)*v.sc;
+  ctx.save();ctx.globalAlpha=a*.95;ctx.translate(cx,cy);ctx.rotate(seal.rot);ctx.drawImage(img,-s/2,-s/2,s,s);ctx.restore()}
+function ensureSealFont(text){if(sealFontsReady.has(text)||!document.fonts||!document.fonts.load)return Promise.resolve(false);
+  return document.fonts.load('700 100px "Noto Serif TC"',text).then(()=>{sealFontsReady.add(text);delete sealCache[text];return true}).catch(()=>false)}
+
+function describe(S,i){
+  const up=S.letters.filter(c=>c!=='.');
+  const K={dot:[`補上 ${S.letters[0]} 的點`,'輕點一下，最後才補'],cross:['補上 t 的橫線','由左向右快速劃過'],xcross:['補上 x 的交叉筆','由右上往左下'],period:['縮寫句點','點在字母右下方'],
+    underline:['底線花飾','從名字下方由左往右一氣拉過'],underline2:['第二道底線','比第一道短，稍微往下'],dash:['橫劃花飾','由左往右斜劃過字母中段'],
+    thread:['一線貫穿','一道長橫由左到右穿過所有字，前重後輕'],oval:['橢圓圈','從右下起筆，逆時針把字母圈起來'],paraph:['花押 Rúbrica','右起往左，來回折返三次，越往下越短']};
+  if(S.kind==='doodle')return{t:S.dname||'畫一個小表情',s:'筆畫圓潤、稍微放慢，讓表情清楚可辨'};
+  if(K[S.kind])return{t:K[S.kind][0],s:K[S.kind][1]};
+  const emoNote=[...(S.emo||[]),...(S.flEmote?[`收尾捲成${S.flEmote}`]:[])];
+  if(S.oneAll){const nm=S.cn?sig.chars.join(''):sig.words.join(' '),ex=['筆尖全程不離紙',...emoNote];if(S.links)ex.push(`${S.cn?'筆畫與字之間':'字母與單字之間'}以 ${S.links} 處連線帶過`);
+    const FL={sweep:'最後回勾橫越字母，再拉成底線',ring:'收筆順勢把整個名字圈起來',paraphC:'收筆往下折返成花押',tail:'收筆向左下拉出長尾',loopTail:'收筆繞圈後回勾拉尾'};if(FL[S.flourish])ex.push(FL[S.flourish]);
+    return{t:`一筆寫完「${nm}」`,s:ex.join('；')}}
+  if(S.cn){const cis=[...new Set(S.strokeIdx.map(x=>x[0]))],chs=cis.map(c=>sig.chars[c]);let t;
+    if(cis.length===1){const idx=S.strokeIdx.map(x=>x[1]),a=idx[0]+1,b=idx.at(-1)+1,tot=sig.counts[cis[0]];t=a===1&&b===tot?`一筆寫完「${chs[0]}」`:a===b?`寫「${chs[0]}」第 ${a} 筆`:`寫「${chs[0]}」第 ${a}–${b} 筆`}
+    else t=`連寫「${chs.join('')}」`;
+    const ex=[...emoNote];if(i===0)ex.push('姓氏起筆，放慢下筆');ex.push(S.links?`含 ${S.links} 處牽絲連筆`:'依正確筆順單獨一筆');
+    if(S.flourish==='tail')ex.push('收筆向左下拉出長尾');if(S.flourish==='loopTail')ex.push('收筆繞圈後回勾拉尾');return{t,s:ex.join('；')}}
+  let t=up.length>1?`連寫 ${up.join(' ')}`:`寫 ${up[0]||''}`;const extra=[...emoNote];
+  if(S.lead)extra.push('先由左下拉一條起筆引線');
+  if(i===0)extra.push('全名第一筆，放慢起筆');
+  if(S.flourish==='tail')extra.push('收筆不停，向左下拉出長尾');
+  if(S.flourish==='loopTail')extra.push('收筆先繞一個小圈，再回勾拉尾');
+  if(S.flourish==='spiral')extra.push('收筆向內捲成螺旋');
+  if(S.flourish==='sweep')extra.push('回勾橫越字母當作橫線，再拉成底線');if(S.flourish==='ring')extra.push('收筆把整個名字圈起來');if(S.flourish==='paraphC')extra.push('收筆往下折返成花押');
+  if(!extra.length)extra.push(up.length>1?'筆尖不離紙':'單獨一筆');
+  return{t,s:extra.join('；')};
+}
+
+/* ============ canvas drawing ============ */
+const patCache={};
+function inkStyle(ctx,pen,color){
+  if(pen!=='pencil')return color;
+  const key=color;if(!patCache[key]){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d'),d=x.createImageData(64,64),n=parseInt(color.slice(1),16),R=n>>16,G=n>>8&255,B=n&255,rr=rng(42);
+    for(let i=0;i<64*64;i++){const a=rr();d.data[i*4]=R;d.data[i*4+1]=G;d.data[i*4+2]=B;d.data[i*4+3]=a<.18?0:Math.round(120+a*135)}x.putImageData(d,0,0);patCache[key]=c}
+  return ctx.createPattern(patCache[key],'repeat');
+}
+function drawSegs(ctx,S,i0,i1,v,color,pen,wMul=1){
+  if(S.parts)return drawOutline(ctx,S,i0,i1,v,color);
+  ctx.strokeStyle=typeof color==='string'?inkStyle(ctx,pen,color):color;ctx.lineCap='round';ctx.lineJoin='round';
+  const P=S.pts,Wd=S.w;
+  if(P.length===1||S.len<.3){ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.arc(v.ox+P[0][0]*v.sc,v.oy+P[0][1]*v.sc,Math.max(.6,Wd[0]*v.sc*.6*wMul),0,7);ctx.fill();return}
+  for(let i=Math.max(1,i0);i<=i1&&i<P.length;i++){
+    ctx.lineWidth=Math.max(.6,(Wd[i-1]+Wd[i])/2*v.sc*wMul);
+    ctx.beginPath();ctx.moveTo(v.ox+P[i-1][0]*v.sc,v.oy+P[i-1][1]*v.sc);ctx.lineTo(v.ox+P[i][0]*v.sc,v.oy+P[i][1]*v.sc);ctx.stroke();
+  }
+}
+function drawAll(ctx,s,v,color,withSeal=true){for(const S of s.strokes)drawSegs(ctx,S,1,S.pts.length-1,v,color,s.pen);if(withSeal&&s.seal)drawSeal(ctx,s.seal,v)}
+function fit(box,W,H,maxW,padX,padY){const bw=box.w+maxW*2+4,bh=box.h+maxW*2+4,sc=Math.min((W-padX*2)/bw,(H-padY*2)/bh);return{sc,ox:W/2-(box.minX+box.w/2)*sc,oy:H/2-(box.minY+box.h/2)*sc}}
+function hexA(h,a){const n=parseInt(h.slice(1),16);return`rgba(${n>>16},${n>>8&255},${n&255},${a})`}
+
+/* ============ main stage ============ */
+const $=id=>document.getElementById(id);
+const stage=$('stage'),cv={guide:$('cvGuide'),ink:$('cvInk'),top:$('cvTop'),practice:$('cvPractice')};
+let sig=null,view={sc:1,ox:0,oy:0,W:0,H:0,dpr:1};
+function sizeCanvases(){const r=stage.getBoundingClientRect(),dpr=Math.min(2.5,devicePixelRatio||1);view.W=r.width;view.H=r.height;view.dpr=dpr;
+  for(const c of Object.values(cv)){c.width=Math.round(r.width*dpr);c.height=Math.round(r.height*dpr);c.getContext('2d').setTransform(dpr,0,0,dpr,0,0)}
+  const sp=$('cvSpeed'),sr=sp.getBoundingClientRect();sp.width=Math.round(sr.width*dpr);sp.height=Math.round(sr.height*dpr);sp.getContext('2d').setTransform(dpr,0,0,dpr,0,0)}
+function layoutView(){const f=fit(sig.box,view.W,view.H,sig.maxW,Math.max(18,view.W*.06),Math.max(22,view.H*.12));view.sc=f.sc;view.ox=f.ox;view.oy=f.oy}
+function drawGuide(){
+  const g=cv.guide.getContext('2d');g.clearRect(0,0,view.W,view.H);
+  const y=Math.min(view.H-24,Math.max(view.H*.5,view.oy+3.2*view.sc));
+  g.strokeStyle='#9AA79F';g.lineWidth=1;g.beginPath();g.moveTo(18,y);g.lineTo(view.W-18,y);g.stroke();
+  g.strokeStyle='#7E8C84';g.lineWidth=1.3;g.beginPath();g.moveTo(22,y-14);g.lineTo(32,y-4);g.moveTo(32,y-14);g.lineTo(22,y-4);g.stroke();
+  g.fillStyle='#8C9A92';g.font='500 9.5px "IBM Plex Mono", monospace';const micro='AUTHORIZED SIGNATURE · 簽名 · ';let txt='';while(g.measureText(txt+micro).width<view.W-36)txt+=micro;g.fillText(txt,18,y+13);
+  if(state.ghost&&sig)drawAll(g,sig,view,hexA(state.ink,state.practice?.26:.13),false);
+}
+const A={playing:false,si:0,tt:0,idx:1,phase:'draw',liftT:0,liftDur:0,from:null,last:0,raf:0};
+function penAt(S,tt){const i=lowerBound(S.t,tt),j=Math.min(i+1,S.pts.length-1),span=(S.t[j]-S.t[i])||1,u=clamp((tt-S.t[i])/span,0,1),a=S.pts[i],b=S.pts[j];return{i,p:[a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u]}}
+function resetInk(upto){const c=cv.ink.getContext('2d');c.clearRect(0,0,view.W,view.H);for(let i=0;i<upto&&i<sig.strokes.length;i++)drawSegs(c,sig.strokes[i],1,1e9,view,state.ink,sig.pen);if(upto>=sig.strokes.length&&sig.seal)drawSeal(c,sig.seal,view)}
+function setLift(k){const prevS=sig.strokes[k-1];A.from=prevS?prevS.pts[prevS.pts.length-1]:null;A.phase=A.from?'lift':'draw';A.liftT=0;A.liftDur=A.from?sig.lift(A.from,sig.strokes[k].pts[0]):0;A.tt=0;A.idx=1}
+function startAt(k,play=true){cancelAnimationFrame(A.raf);k=clamp(k,0,sig.strokes.length-1);resetInk(k);A.si=k;setLift(k);A.playing=play;setPlayBtn();updateSteps();A.last=performance.now();A.raf=requestAnimationFrame(tick);drawTop()}
+function finishAll(){cancelAnimationFrame(A.raf);resetInk(sig.strokes.length);A.si=sig.strokes.length;A.playing=false;setPlayBtn();updateSteps();drawTop()}
+function tick(ts){
+  const dt=Math.min(.05,(ts-A.last)/1000);A.last=ts;
+  if(!A.playing){drawTop();return}
+  const S=sig.strokes[A.si];if(!S){A.playing=false;setPlayBtn();updateSteps();drawTop();return}
+  if(A.phase==='lift'){A.liftT+=dt*state.speed;if(A.liftT>=A.liftDur){A.phase='draw';A.tt=0;A.idx=1}}
+  else{
+    A.tt+=dt*state.speed*.8;
+    const done=A.tt>=S.dur,{i}=penAt(S,Math.min(A.tt,S.dur));
+    const c=cv.ink.getContext('2d');drawSegs(c,S,A.idx,done?1e9:i,view,state.ink,sig.pen);if(S.len<.3)drawSegs(c,S,1,1,view,state.ink,sig.pen);
+    A.idx=Math.max(A.idx,i+1);
+    if(done){A.si++;if(A.si>=sig.strokes.length&&sig.seal)drawSeal(c,sig.seal,view);updateSteps();if(A.si<sig.strokes.length)setLift(A.si);if(A.si>=sig.strokes.length||state.step){A.playing=false;setPlayBtn()}}
+  }
+  drawTop();A.raf=requestAnimationFrame(tick);
+}
+const X=p=>[view.ox+p[0]*view.sc,view.oy+p[1]*view.sc];
+function drawTop(){
+  const c=cv.top.getContext('2d');c.clearRect(0,0,view.W,view.H);drawSpeed();
+  if(!sig)return;const accent='#2F6B5A';
+  if(state.nums){sig.strokes.forEach((S,i)=>{if(i<A.si)return;const[x,y]=X(S.pts[0]),now=i===A.si,r=now?10:8.5;
+    c.beginPath();c.arc(x,y,r,0,7);c.fillStyle=now?accent:'rgba(251,251,247,.92)';c.fill();c.lineWidth=1.2;c.strokeStyle=now?accent:'#7E8C84';c.stroke();
+    c.fillStyle=now?'#FBFBF7':'#43514A';c.font=`500 ${now?11:10}px "IBM Plex Mono", monospace`;c.textAlign='center';c.textBaseline='middle';c.fillText(i+1,x,y+.5);
+    if(now&&S.pts.length>4){const q=S.pts[Math.min(S.pts.length-1,Math.round(S.pts.length*.04)+4)],[qx,qy]=X(q),ang=Math.atan2(qy-y,qx-x),ax=x+Math.cos(ang)*(r+9),ay=y+Math.sin(ang)*(r+9);
+      c.save();c.translate(ax,ay);c.rotate(ang);c.fillStyle=accent;c.beginPath();c.moveTo(6,0);c.lineTo(-3,-4.5);c.lineTo(-3,4.5);c.closePath();c.fill();c.restore()}})}
+  if(state.practice)return;
+  const S=sig.strokes[A.si];if(!S)return;let p;
+  if(A.phase==='lift'&&A.from){const e=smooth(A.liftT/(A.liftDur||1)),b=S.pts[0];p=[A.from[0]+(b[0]-A.from[0])*e,A.from[1]+(b[1]-A.from[1])*e];
+    const[fx,fy]=X(A.from),[px,py]=X(p);c.setLineDash([3,5]);c.strokeStyle='rgba(47,107,90,.55)';c.lineWidth=1.2;c.beginPath();c.moveTo(fx,fy);c.lineTo(px,py);c.stroke();c.setLineDash([])}
+  else p=penAt(S,Math.min(A.tt,S.dur)).p;
+  if(!A.playing&&A.phase!=='lift'&&A.tt===0)return;
+  const[x,y]=X(p);c.beginPath();c.arc(x,y,7,0,7);c.fillStyle='rgba(47,107,90,.18)';c.fill();c.beginPath();c.arc(x,y,2.6,0,7);c.fillStyle=accent;c.fill();
+}
+function drawSpeed(){
+  const cvs=$('cvSpeed'),c=cvs.getContext('2d'),W=cvs.clientWidth,H=cvs.clientHeight;c.clearRect(0,0,W,H);
+  if(!sig)return;const S=sig.strokes[Math.min(A.si,sig.strokes.length-1)];if(!S||S.pts.length<3)return;
+  const vmax=Math.max(...S.v)*1.08||1,T=S.dur,px=t=>t/T*(W-4)+2,py=v=>H-4-(v/vmax)*(H-10);
+  c.strokeStyle='rgba(47,107,90,.18)';c.lineWidth=1;c.beginPath();c.moveTo(0,H-4);c.lineTo(W,H-4);c.stroke();
+  c.beginPath();c.moveTo(px(0),H-4);S.v.forEach((v,i)=>c.lineTo(px(S.t[i]),py(v)));c.lineTo(px(T),H-4);c.closePath();c.fillStyle='rgba(47,107,90,.12)';c.fill();
+  c.beginPath();S.v.forEach((v,i)=>i?c.lineTo(px(S.t[i]),py(v)):c.moveTo(px(S.t[i]),py(v)));c.strokeStyle='#2F6B5A';c.lineWidth=1.5;c.stroke();
+  const tt=A.si>=sig.strokes.length?T:(A.phase==='lift'?0:Math.min(A.tt,T)),{i}=penAt(S,tt);
+  c.beginPath();c.arc(px(tt),py(S.v[i]),3.2,0,7);c.fillStyle='#2F6B5A';c.fill();
+  c.fillStyle='#6F7E76';c.font='500 9.5px "IBM Plex Mono", monospace';c.textAlign='right';c.textBaseline='top';
+  c.fillText(`第 ${Math.min(A.si,sig.strokes.length-1)+1} 筆 · ${(T/.8).toFixed(2)} s`,W-2,1);
+}
+
+/* ============ UI ============ */
+function setPlayBtn(){const b=$('bPlay'),done=A.si>=sig.strokes.length;b.querySelector('span').textContent=A.playing?'暫停':done?'重新播放':A.si>0?'繼續':'播放示範';
+  b.querySelector('svg').innerHTML=A.playing?'<path d="M4 2.5h3v11H4zM9 2.5h3v11H9z" fill="currentColor"/>':'<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>'}
+function updateSteps(){[...$('steps').children].forEach((li,i)=>{li.classList.toggle('done',i<A.si);li.classList.toggle('now',i===A.si)});
+  const S=sig.strokes[A.si];$('nowLabel').textContent=S?`第 ${A.si+1} 筆 · ${describe(S,A.si).t}`:'完成 · 可按描寫練習自己試試'}
+function renderSteps(){const ol=$('steps');ol.innerHTML='';
+  sig.strokes.forEach((S,i)=>{const d=describe(S,i),li=document.createElement('li');li.innerHTML=`<button type="button"><span class="num">${i+1}</span><span class="t">${d.t}<small>${d.s}</small></span></button>`;
+    li.querySelector('button').onclick=()=>{if(state.practice)togglePractice(false);startAt(i,true)};ol.appendChild(li)});
+  let secs=0;sig.strokes.forEach((S,i)=>{secs+=S.dur/.8;if(i)secs+=sig.lift(sig.strokes[i-1].pts.at(-1),S.pts[0])});
+  $('stats').textContent=`${sig.strokes.length} 筆 · 提筆 ${sig.strokes.length-1} 次 · 約 ${secs.toFixed(1)} 秒`}
+const stylesOf=sc=>Object.keys(STYLES).filter(k=>scriptOf(k)===sc).sort((a,b)=>(STYLES[a].one?0:1)-(STYLES[b].one?0:1));
+function renderStyles(){const box=$('styles');box.innerHTML='';let grp=null;
+  stylesOf(state.script).forEach(k=>{const s=STYLES[k],g=s.one?'one':'other';
+    if(g!==grp){grp=g;const h=document.createElement('p');h.className='style-grp';h.textContent=s.one?'一筆簽系列 · 筆尖不離紙':'其他風格';box.appendChild(h)}
+    const b=document.createElement('button');b.type='button';b.className='style';b.setAttribute('aria-pressed',k===state.style);b.innerHTML=`<b>${s.zh}</b><em>${s.en}</em>`;b.onclick=()=>selectStyle(k);box.appendChild(b)});
+  $('styleDesc').textContent=STYLES[state.style].desc}
+function styleDefaults(k){state.style=k;const s=STYLES[k];Object.assign(state,{slant:s.slant,cap:s.cap,sw:s.sw,w:1,initials:!!s.autoInit,seal:!!s.seal,link:s.link??.5,simp:s.simplify??0});$('cInit').checked=state.initials;$('cSeal').checked=state.seal;syncSliders()}
+function selectStyle(k){styleDefaults(k);state.seed=0;renderStyles();regenerate(true);renderGallery()}
+function updateScriptUI(){const cn=state.script==='cn',n=stylesOf(state.script).length,ones=stylesOf(state.script).filter(k=>STYLES[k].one).length;
+  $('tabLatin').setAttribute('aria-selected',!cn);$('tabCn').setAttribute('aria-selected',cn);
+  $('lblCap').textContent=cn?'姓氏比例':'首字母比例';$('lblInit').hidden=cn;$('lblSeal').hidden=!cn;$('rowLink').hidden=!cn;$('rowSimp').hidden=!cn;
+  $('name').placeholder=cn?'輸入中文姓名':'Your Name';
+  $('styleCount').textContent=`簽名風格 · ${cn?'中文':'英文'} ${n} 種`;$('hGal').textContent=`自動設計：同一個名字，${n} 種簽法（含 ${ones} 種一筆簽）`}
+function syncSliders(){$('sSlant').value=state.slant;$('oSlant').textContent=state.slant+'°';$('sCap').value=state.cap;$('oCap').textContent='×'+(+state.cap).toFixed(2);
+  $('sSw').value=state.sw;$('oSw').textContent=state.sw<.03?'無':(+state.sw).toFixed(2);$('sW').value=state.w;$('oW').textContent='×'+(+state.w).toFixed(2);
+  const one=!!STYLES[state.style].oneStroke;$('sLink').value=one?1:state.link;$('sLink').disabled=one;$('oLink').textContent=one?'一筆（固定）':Math.round(state.link*100)+'%';
+  const ol=!!STYLES[state.style].outline;$('sSimp').value=ol?0:state.simp;$('sSimp').disabled=ol;$('oSimp').textContent=ol?'楷書輪廓（不草化）':Math.round(state.simp*100)+'%';
+  $('sM').value=state.m;$('oM').textContent=(+state.m).toFixed(2);$('sSpeed').value=state.speed;$('oSpeed').textContent='×'+(+state.speed).toFixed(1)}
+function renderInks(){const box=$('inks');box.innerHTML='';INKS.forEach(o=>{const b=document.createElement('button');b.type='button';b.className='ink';b.style.background=o.c;b.title=o.n;b.setAttribute('aria-label',o.n);b.setAttribute('aria-pressed',o.c===state.ink);
+  b.onclick=()=>{state.ink=o.c;renderInks();drawGuide();resetInk(A.si);renderGallery()};box.appendChild(b)})}
+function optsFor(k){const s=STYLES[k],cn=scriptOf(k)==='cn';return k===state.style?{name:state.name,style:k,seed:state.seed,slant:state.slant,cap:state.cap,sw:state.sw,w:state.w,m:state.m,initials:state.initials,cn,seal:state.seal,link:state.link,simplify:state.simp}
+  :{name:state.name,style:k,seed:state.seed,slant:s.slant,cap:s.cap,sw:s.sw,w:1,m:state.m,initials:!!s.autoInit,cn,seal:!!s.seal}}
+function renderGallery(){if(state.loading||!sig)return;const g=$('gallery');g.innerHTML='';let grid=null,grp=null;
+  stylesOf(state.script).forEach(k=>{const s=STYLES[k],gk=s.one?'one':'other';
+    if(gk!==grp){grp=gk;const h=document.createElement('h3');h.className='gal-h';h.innerHTML=s.one?'一筆簽系列 <span>筆尖不離紙，一次簽完</span>':'其他風格 <span>保留提筆，字形更完整</span>';g.appendChild(h);grid=document.createElement('div');grid.className='gal-grid';g.appendChild(grid)}
+    const sg=k===state.style?sig:build(optsFor(k)),ev=evaluate(sg),b=document.createElement('button');b.type='button';b.className='thumb';b.setAttribute('aria-pressed',k===state.style);
+    b.innerHTML=`<canvas></canvas><span class="badge">${ev.grade} · ${ev.overall}</span><span class="cap"><span>${s.zh}${ev.lifts===0?'<i class="one">一筆完成</i>':''}</span><em>${s.en}</em></span>`;grid.appendChild(b);
+    b.title=ev.verdict;b.onclick=()=>{selectStyle(k);window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})};
+    const c=b.querySelector('canvas');requestAnimationFrame(()=>{const r=c.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);c.width=r.width*dpr;c.height=r.height*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);drawAll(x,sg,fit(sg.box,r.width,r.height,sg.maxW,12,14),state.ink)})})}
+function regenerate(autoplay){
+  const nm=$('name').value,hasCJK=[...nm].some(isCJK),hasLat=/[A-Za-z]/.test(nm);
+  let script=state.script;if(script==='latin'&&hasCJK)script='cn';else if(script==='cn'&&!hasCJK&&hasLat)script='latin';
+  state.names[script]=nm;state.name=nm;
+  const needCh=[...new Set([...nm].filter(isCJK)),'簽','名'];
+  if(script==='cn'&&!hzReady(needCh)){state.loading=true;state.script='cn';updateScriptUI();$('nameHint').textContent='正在載入這幾個字的筆順資料…';
+    loadChars(needCh).then(()=>{state.loading=false;regenerate(autoplay);renderGallery();runSuggest()}).catch(()=>{$('nameHint').textContent='中文筆順資料載入失敗，請重新整理頁面再試一次。'});return}
+  state.loading=false;
+  if(script!==state.script||scriptOf(state.style)!==script){state.script=script;if(scriptOf(state.style)!==script){styleDefaults(script==='cn'?'xingOut':'classic');state.seed=0}renderStyles()}
+  updateScriptUI();
+  if(script==='cn'){const miss=[...new Set([...nm].filter(c=>isCJK(c)&&!HZ[c]))];$('nameHint').textContent=miss.length?`「${miss.join('')}」沒有筆順資料，已略過。`:'依標準筆順書寫。可以在名字裡加 ♡ ★ ♪ ☺ :) <3 等符號。'}
+  else {const tk=tokenize(nm),bad=tk.filter(x=>x.t==='X').map(x=>x.c),unk=tk.some(x=>x.unknown);$('nameHint').textContent=bad.length?`「${[...new Set(bad)].join('')}」無法手寫，已略過。`:unk?'不認得的表情已改畫成星芒。':'可以在名字裡加 ♡ ★ ♪ ☺ :) <3 等符號；輸入中文會切到中文簽名。'}
+  sig=build(optsFor(state.style));
+  if(sig.seal)ensureSealFont(sig.seal.text).then(ch=>{if(!ch)return;if(A.si>=sig.strokes.length)resetInk(A.si);renderGallery();renderSuggest()});
+  $('headStyle').textContent=STYLES[state.style].en+' · '+STYLES[state.style].zh;$('headSeed').textContent='No. '+String(state.seed+1).padStart(4,'0');
+  layoutView();drawGuide();renderSteps();renderEval();if(state.practice)clearPractice();
+  if(autoplay&&!state.practice)startAt(0,true);else finishAll();
+}
+function switchTab(sc){if(sc===state.script&&!state.loading)return;state.names[state.script]=$('name').value;$('name').value=state.names[sc];state.script=sc;state.seed=0;
+  if(scriptOf(state.style)!==sc)styleDefaults(sc==='cn'?'xingOut':'classic');regenerate(true);renderGallery();runSuggest()}
+$('tabLatin').onclick=()=>switchTab('latin');$('tabCn').onclick=()=>switchTab('cn');
+/* evaluation */
+const EVDIM=[['fluency','流暢度'],['legibility','易讀性'],['balance','平衡感'],['appeal','吸引力'],['ease','好練度'],['one','一筆完成度']];
+const EVNOTE={fluency:'提筆次數偏多，簽起來比較慢',legibility:'字形重疊較多、易讀性偏低，正式文件建議改用字形完整的風格',balance:'長寬比例較極端，放進簽名欄時可調整傾斜或比例',appeal:'造型偏保守，可以提高收尾花飾或首字比例',ease:'轉折多、筆程長，需要多練幾次才能穩定',one:'需要多次提筆，無法一筆簽完'};
+function evaluate(sg){
+  const S=sg.strokes,b=sg.box,st=STYLES[sg.styleKey]||{},T=TRAITS[sg.styleKey]||[.5,.5,.5,.5,.5,.5];
+  const lifts=S.length-1,units=sg.cn?sg.counts.reduce((a,c)=>a+c,0):Math.max(1,sg.words.join('').length);
+  let turn=0,len=0;for(const s of S){len+=s.len;const P=s.pts;for(let i=3;i<P.length-3;i+=3){const a=P[i-3],p=P[i],c=P[i+3],d1=[p[0]-a[0],p[1]-a[1]],d2=[c[0]-p[0],c[1]-p[1]];turn+=Math.abs(Math.atan2(d1[0]*d2[1]-d1[1]*d2[0],d1[0]*d2[0]+d1[1]*d2[1]))}}
+  const turnD=turn/Math.max(1,len);
+  const cw=Math.max(b.w,b.h)/64||1,cells=new Map();let over=0;
+  S.forEach((s,si)=>s.pts.forEach((p,i)=>{if(i%2)return;const key=Math.floor((p[0]-b.minX)/cw)*1000+Math.floor((p[1]-b.minY)/cw),c=s.cum[i],e=cells.get(key);
+    if(!e)cells.set(key,{si,c,o:false});else if(!e.o&&(e.si!==si||Math.abs(e.c-c)>cw*8)){e.o=true;over++}}));
+  const overlap=over/Math.max(1,cells.size);
+  let mx=0,n=0;S.forEach(s=>s.pts.forEach(p=>{mx+=p[0];n++}));mx/=Math.max(1,n);
+  const aspect=b.w/Math.max(1,b.h),ideal=st.vertical?.35:sg.cn?2.2:2.8,aS=Math.exp(-Math.pow(Math.log(aspect/ideal),2)/.8),cS=clamp(1-Math.abs(mx-(b.minX+b.w/2))/(b.w/2)*1.4,0,1);
+  const ws=S.flatMap(s=>s.w).sort((a,c)=>a-c),p10=ws[Math.floor(ws.length*.1)]||.1,p90=ws[Math.floor(ws.length*.9)]||.1,wc=clamp(Math.log(p90/Math.max(.05,p10))/Math.log(5),0,1);
+  let secs=0;S.forEach((s,i)=>{secs+=s.dur/.8;if(i)secs+=sg.lift(S[i-1].pts.at(-1),s.pts[0])});
+  const flourish=S.some(s=>s.flourish)||S.some(s=>['underline','paraph','oval','dash','underline2'].includes(s.kind));
+  const capR=clamp(((sg.capRatio||1)-1)/1.4,0,1),sl=clamp(Math.abs(sg.slantDeg||0)/25,0,1),liftR=lifts/(units*(sg.cn?1.6:2.2)),real=secs/4.5;
+  const d={fluency:.65*clamp(1-liftR,0,1)+.35*clamp(1-(turnD-.12)/.7,0,1),
+    legibility:clamp(T[0]*(1-overlap*1.4)+.12,0,1),
+    balance:clamp(.6*aS+.4*cS,0,1),
+    appeal:clamp(.26*wc+.2*(flourish?1:0)+.16*capR+.12*sl+.12*clamp((turnD-.1)/.5,0,1)+.14*(lifts===0?1:0)+.08,0,1),
+    ease:clamp(.5*clamp(1-(real-1.2)/5,0,1)+.25*(1-clamp(overlap*2.5,0,1))+.25*clamp(1-liftR,0,1),0,1),
+    one:lifts===0?1:clamp(.85-lifts/12,0,.85)};
+  for(const k in d)d[k]=Math.round(d[k]*100);
+  const overall=Math.round(.2*d.fluency+.2*d.legibility+.15*d.balance+.25*d.appeal+.1*d.ease+.1*d.one);
+  const grade=overall>=86?'A+':overall>=78?'A':overall>=70?'B+':overall>=62?'B':overall>=54?'C+':'C';
+  const srt=EVDIM.map(([k,z])=>[k,z,d[k]]).sort((a,c)=>c[2]-a[2]),worst=srt.filter(x=>x[0]!=='one').at(-1);
+  const verdict=`${lifts===0?'一筆就能簽完。':''}優點是${srt.filter(x=>x[0]!=='one'||lifts===0).slice(0,2).map(x=>x[1]).join('、')}；${worst[2]<60?'要注意：'+EVNOTE[worst[0]]+'。':'各項表現都在水準以上。'}`;
+  return{dims:d,overall,grade,lifts,secs:real,aspect,overlap,verdict}}
+function renderEval(){const ev=evaluate(sig);$('evGrade').textContent=ev.grade;$('evScore').textContent=ev.overall+' / 100';
+  $('evBars').innerHTML=EVDIM.map(([k,z])=>`<div class="evbar${ev.dims[k]<60?' low':''}"><span>${z}</span><output>${ev.dims[k]}</output><div class="meter"><i style="width:${ev.dims[k]}%"></i></div></div>`).join('');
+  $('evVerdict').textContent=`${STYLES[state.style].zh}：${ev.verdict}（${ev.lifts===0?'不提筆':'提筆 '+ev.lifts+' 次'}，實際書寫約 ${ev.secs.toFixed(1)} 秒，墨跡重疊 ${Math.round(ev.overlap*100)}%）`}
+let tmr=0;
+$('name').addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(()=>{regenerate(false);renderGallery();runSuggest()},260)});
+$('name').addEventListener('keydown',e=>{if(e.key==='Enter'){clearTimeout(tmr);regenerate(true);renderGallery();runSuggest()}});
+[['sSlant','slant'],['sCap','cap'],['sSw','sw'],['sW','w'],['sM','m'],['sLink','link'],['sSimp','simp']].forEach(([id,key])=>{$(id).addEventListener('input',e=>{state[key]=+e.target.value;syncSliders();regenerate(false)});$(id).addEventListener('change',()=>renderGallery())});
+$('sSpeed').addEventListener('input',e=>{state.speed=+e.target.value;syncSliders()});
+$('cGhost').onchange=e=>{state.ghost=e.target.checked;drawGuide()};
+$('cNums').onchange=e=>{state.nums=e.target.checked;drawTop()};
+$('cInit').onchange=e=>{state.initials=e.target.checked;regenerate(true);renderGallery()};
+$('cSeal').onchange=e=>{state.seal=e.target.checked;regenerate(false);renderGallery()};
+document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{$('name').value=b.dataset.ex;regenerate(true);renderGallery();runSuggest()});
+$('bVary').onclick=()=>{state.seed++;regenerate(true);renderGallery()};
+function resume(){A.playing=true;setPlayBtn();A.last=performance.now();cancelAnimationFrame(A.raf);A.raf=requestAnimationFrame(tick)}
+$('bPlay').onclick=()=>{if(state.practice)togglePractice(false);if(A.playing){A.playing=false;setPlayBtn();return}if(A.si>=sig.strokes.length){startAt(0,true);return}resume()};
+function stepOn(){state.step=true;$('bStep').setAttribute('aria-pressed','true')}
+$('bPrev').onclick=()=>{if(state.practice)togglePractice(false);stepOn();const inProg=A.playing||(A.phase==='draw'&&A.tt>0);startAt(Math.max(0,A.si-(inProg?0:1)),true)};
+$('bNext').onclick=()=>{if(state.practice)togglePractice(false);stepOn();if(A.si>=sig.strokes.length){startAt(0,true);return}if(A.playing){finishStroke();return}resume()};
+function finishStroke(){const S=sig.strokes[A.si];drawSegs(cv.ink.getContext('2d'),S,1,1e9,view,state.ink,sig.pen);A.si++;if(A.si>=sig.strokes.length&&sig.seal)drawSeal(cv.ink.getContext('2d'),sig.seal,view);A.playing=false;if(A.si<sig.strokes.length)setLift(A.si);setPlayBtn();updateSteps();drawTop()}
+$('bStep').onclick=e=>{state.step=!state.step;e.currentTarget.setAttribute('aria-pressed',state.step)};
+
+let drawing=null;
+function clearPractice(){cv.practice.getContext('2d').clearRect(0,0,view.W,view.H)}
+function togglePractice(on){state.practice=on;$('bPractice').setAttribute('aria-pressed',on);$('bClear').hidden=!on;cv.practice.hidden=!on;stage.classList.toggle('practice',on);
+  if(on){cancelAnimationFrame(A.raf);A.playing=false;A.si=0;A.tt=0;setPlayBtn();updateSteps();$('nowLabel').textContent='描寫練習 · 照著淡色底稿與編號順序寫'}else{clearPractice();finishAll()}drawGuide();drawTop()}
+$('bPractice').onclick=()=>togglePractice(!state.practice);$('bClear').onclick=clearPractice;
+cv.practice.addEventListener('pointerdown',e=>{cv.practice.setPointerCapture(e.pointerId);const r=cv.practice.getBoundingClientRect();drawing={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now(),w:2.5}});
+cv.practice.addEventListener('pointermove',e=>{if(!drawing)return;const r=cv.practice.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,now=performance.now(),d=Math.hypot(x-drawing.x,y-drawing.y),v=d/Math.max(1,now-drawing.t),base=Math.max(1.2,sig.maxW*view.sc*.6),pr=e.pressure&&e.pointerType==='pen'?e.pressure*1.6:1;
+  drawing.w=drawing.w*.6+Math.max(.8,Math.min(base*1.3,base*pr/(1+v*1.2)))*.4;const c=cv.practice.getContext('2d');c.strokeStyle=state.ink;c.lineCap='round';c.lineWidth=drawing.w;c.beginPath();c.moveTo(drawing.x,drawing.y);c.lineTo(x,y);c.stroke();Object.assign(drawing,{x,y,t:now})});
+['pointerup','pointercancel','pointerleave'].forEach(t=>cv.practice.addEventListener(t,()=>drawing=null));
+
+function outlinePath(S){const P=S.pts,Wd=S.w;if(P.length<2||S.len<.3){const[x,y]=P[0],r=Wd[0]*.6;return`M${(x-r).toFixed(2)} ${y.toFixed(2)}a${r.toFixed(2)} ${r.toFixed(2)} 0 1 0 ${(2*r).toFixed(2)} 0a${r.toFixed(2)} ${r.toFixed(2)} 0 1 0 ${(-2*r).toFixed(2)} 0Z`}
+  const L=[],R=[];for(let i=0;i<P.length;i++){const a=P[Math.max(0,i-1)],b=P[Math.min(P.length-1,i+1)],dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d,h=Wd[i]/2;L.push([P[i][0]+nx*h,P[i][1]+ny*h]);R.push([P[i][0]-nx*h,P[i][1]-ny*h])}
+  const f=p=>p[0].toFixed(2)+' '+p[1].toFixed(2);return'M'+L.map(f).join('L')+'L'+R.reverse().map(f).join('L')+'Z'}
+function svgString(){const b=sig.box,m=sig.maxW+3,vb=[b.minX-m,b.minY-m,b.w+2*m,b.h+2*m].map(v=>v.toFixed(2)).join(' ');
+  return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" width="${Math.round((b.w+2*m)*8)}" height="${Math.round((b.h+2*m)*8)}"><g fill="${state.ink}">${sig.strokes.map(S=>`<path d="${outlinePath(S)}"/>`).join('')}</g>${sig.seal?`<image href="${sealImage(sig.seal.text).toDataURL()}" x="${sig.seal.x.toFixed(2)}" y="${sig.seal.y.toFixed(2)}" width="${sig.seal.s.toFixed(2)}" height="${sig.seal.s.toFixed(2)}" transform="rotate(${(sig.seal.rot*57.3).toFixed(2)} ${(sig.seal.x+sig.seal.s/2).toFixed(2)} ${(sig.seal.y+sig.seal.s/2).toFixed(2)})"/>`:''}</svg>`}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1800)}
+$('bSvg').onclick=()=>{const s=svgString(),ex=$('export'),fb=()=>{ex.className='export show';ex.innerHTML='<p class="hint" style="margin:0 0 6px">無法直接寫入剪貼簿，請全選下方文字複製：</p><textarea id="svgTxt" readonly></textarea>';$('svgTxt').value=s;$('svgTxt').select()};
+  try{navigator.clipboard.writeText(s).then(()=>toast('已複製 SVG'),fb)}catch(e){fb()}};
+$('bPng').onclick=()=>{const b=sig.box,m=sig.maxW+3,k=10,c=document.createElement('canvas');c.width=Math.round((b.w+2*m)*k);c.height=Math.round((b.h+2*m)*k);drawAll(c.getContext('2d'),sig,{sc:k,ox:(-b.minX+m)*k,oy:(-b.minY+m)*k},state.ink);
+  const ex=$('export');ex.className='export show';ex.innerHTML='<p class="hint" style="margin:0 0 8px">透明背景 PNG。桌機請右鍵「另存圖片」，手機請長按圖片儲存。</p>';const img=new Image();img.src=c.toDataURL('image/png');img.alt='簽名圖檔';ex.appendChild(img)};
+
+/* ============ FILM: fullscreen brand animation ============ */
+const SCENES={
+  gold:{zh:'金箔夜宴',bg:'#1A140C',bg2:'#030302',ink:'gold',glow:'rgba(255,190,100,.55)',blur:16,sparks:'gold',grain:.05,fg:'#F1DCA2',sub:'#A38D5A',font:'"Bodoni Moda",serif',cam:1.4,shimmer:true,wMul:1,dark:true},
+  paper:{zh:'紙本墨跡',bg:'#EFEEE8',bg2:'#D6D4CB',ink:'user',glow:null,grain:.07,fg:'#1E232B',sub:'#72767A',font:'"Bodoni Moda",serif',cam:1.35,line:true,wMul:1},
+  neon:{zh:'霓虹燈管',bg:'#0C0B22',bg2:'#020208',ink:'#F2FFFF',glow:'rgba(40,215,245,.95)',blur:24,glow2:'rgba(255,60,190,.55)',flicker:true,grain:.04,fg:'#A9F4FF',sub:'#6A7FA8',font:'"IBM Plex Mono",monospace',cam:1.25,wMul:.8,dark:true},
+  studio:{zh:'純白品牌',bg:'#FFFFFF',bg2:'#EDEDED',ink:'#0B0B0C',glow:null,grain:0,fg:'#0B0B0C',sub:'#8A8A8A',font:'"Bodoni Moda",serif',cam:1.1,wMul:1,wipe:true},
+  light:{zh:'光繪長曝',bg:'#070810',bg2:'#000000',ink:'#FFF4E6',glow:'rgba(255,140,60,.85)',blur:28,sparks:'ember',grain:.05,fg:'#FFDDBB',sub:'#8C6F58',font:'"IBM Plex Mono",monospace',cam:1.55,wMul:.6,dark:true,trail:true}
+};
+const F={on:false,scene:'gold',loop:true,raf:0,last:0,t:0,W:0,H:0,dpr:1,sig:null,parts:[],cam:{x:0,y:0},reduced:false};
+const film=$('film'),fcv=$('filmCv');
+function renderChips(){const box=$('sceneChips');box.innerHTML='';for(const[k,s]of Object.entries(SCENES)){const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=s.zh;b.setAttribute('aria-pressed',k===F.scene);b.onclick=()=>{F.scene=k;renderChips();filmPrepare();F.t=0};box.appendChild(b)}}
+function filmSize(){F.dpr=Math.min(2,devicePixelRatio||1);F.W=film.clientWidth;F.H=film.clientHeight;fcv.width=Math.round(F.W*F.dpr);fcv.height=Math.round(F.H*F.dpr)}
+function filmPrepare(){
+  const sc=SCENES[F.scene],s=F.sig=sig,b=s.box,margin=s.maxW+10;
+  // final framing
+  const bw=b.w+margin*2,bh=b.h+margin*2;F.fsc=Math.min(F.W*.74/bw,F.H*.46/bh);F.anchor=[F.W/2,F.H*.43];
+  F.center=[b.minX+b.w/2,b.minY+b.h/2];
+  const camZ=F.reduced?1:sc.cam;F.camZ=camZ;
+  let L=F.fsc*camZ*F.dpr;L=Math.min(L,4096/bw,4096/bh);F.L=L;F.bx0=b.minX-margin;F.by0=b.minY-margin;
+  const mk=()=>{const c=document.createElement('canvas');c.width=Math.ceil(bw*L);c.height=Math.ceil(bh*L);return c};
+  F.layer=mk();F.glowL=sc.glow?mk():null;F.drawn=s.strokes.map(()=>1);F.parts=[];
+  // ink style on layer
+  const lc=F.layer.getContext('2d');
+  if(sc.ink==='gold'){const g=lc.createLinearGradient(0,0,F.layer.width,F.layer.height*.6);[['#7A5A22',0],['#E9C77A',.22],['#FFF0C4',.36],['#B8893A',.55],['#F4D98B',.75],['#8E6B2E',1]].forEach(([c,o])=>g.addColorStop(o,c));F.inkStyle=g}
+  else F.inkStyle=sc.ink==='user'?state.ink:sc.ink;
+  // timeline (kinematic time, compressed to a filmic 3.5–7.5 s)
+  let T=0;s.strokes.forEach((S,i)=>{if(i)T+=s.lift(s.strokes[i-1].pts.at(-1),S.pts[0]);T+=S.dur});
+  const D=clamp(T*.85,3.4,7.5);F.k=T/D;F.start=[];let cur=1.1;
+  s.strokes.forEach((S,i)=>{if(i)cur+=s.lift(s.strokes[i-1].pts.at(-1),S.pts[0])/F.k;F.start.push(cur);cur+=S.dur/F.k});
+  F.tEnd=cur;F.total=F.tEnd+5.6;
+  const p0=s.strokes[0].pts[0];F.cam={x:p0[0],y:p0[1]};
+  // background
+  const bgc=document.createElement('canvas');bgc.width=fcv.width;bgc.height=fcv.height;const bx=bgc.getContext('2d'),R=Math.hypot(bgc.width,bgc.height)*.6;
+  const rg=bx.createRadialGradient(bgc.width/2,bgc.height*.42,0,bgc.width/2,bgc.height*.42,R);rg.addColorStop(0,sc.bg);rg.addColorStop(1,sc.bg2);bx.fillStyle=rg;bx.fillRect(0,0,bgc.width,bgc.height);F.bg=bgc;
+  if(!F.noise){const n=document.createElement('canvas');n.width=n.height=192;const nx=n.getContext('2d'),d=nx.createImageData(192,192),rr=rng(7);for(let i=0;i<192*192;i++){const v=rr()*255;d.data[i*4]=d.data[i*4+1]=d.data[i*4+2]=v;d.data[i*4+3]=255}nx.putImageData(d,0,0);F.noise=n}
+  $('filmTitle').textContent=`Inkline Film · ${sc.zh} · ${STYLES[state.style].en}`;
+}
+function layerSeg(S,i0,i1){
+  const sc=SCENES[F.scene],L=F.L,lc=F.layer.getContext('2d'),gc=F.glowL&&F.glowL.getContext('2d'),P=S.pts,Wd=S.w,wm=sc.wMul;
+  const pl=p=>[(p[0]-F.bx0)*L,(p[1]-F.by0)*L];
+  lc.lineCap=lc.lineJoin='round';lc.strokeStyle=typeof F.inkStyle==='string'?(sc.ink==='user'?inkStyle(lc,F.sig.pen,F.inkStyle):F.inkStyle):F.inkStyle;
+  if(gc){gc.lineCap='round';gc.strokeStyle=sc.glow;gc.shadowColor=sc.glow;gc.shadowBlur=sc.blur*F.dpr}
+  if(S.parts){const v={sc:L,ox:-F.bx0*L,oy:-F.by0*L};drawOutline(lc,S,i0,i1,v,lc.strokeStyle);if(gc)drawOutline(gc,S,i0,i1,v,sc.glow,{glow:true});return}
+  if(P.length===1||S.len<.3){const[x,y]=pl(P[0]);lc.fillStyle=lc.strokeStyle;lc.beginPath();lc.arc(x,y,Math.max(1,Wd[0]*L*.6*wm),0,7);lc.fill();if(gc){gc.fillStyle=sc.glow;gc.beginPath();gc.arc(x,y,Wd[0]*L*wm,0,7);gc.fill()}return}
+  for(let i=Math.max(1,i0);i<=i1&&i<P.length;i++){const a=pl(P[i-1]),b=pl(P[i]),w=Math.max(1,(Wd[i-1]+Wd[i])/2*L*wm);
+    lc.lineWidth=w;lc.beginPath();lc.moveTo(a[0],a[1]);lc.lineTo(b[0],b[1]);lc.stroke();
+    if(gc){gc.lineWidth=w*1.6;gc.beginPath();gc.moveTo(a[0],a[1]);gc.lineTo(b[0],b[1]);gc.stroke()}}
+}
+function filmFrame(ts){
+  const dt=Math.min(.05,(ts-F.last)/1000);F.last=ts;F.t+=dt;
+  if(F.t>F.total){if(F.loop){F.t=0;filmPrepare()}else F.t=F.total}
+  const sc=SCENES[F.scene],s=F.sig,c=fcv.getContext('2d'),dpr=F.dpr,t=F.t;
+  // advance ink
+  let pen=null,penV=0;
+  s.strokes.forEach((S,i)=>{const local=(t-F.start[i])*F.k;if(local<=0)return;
+    const done=local>=S.dur,{i:idx,p}=penAt(S,Math.min(local,S.dur));
+    if(F.drawn[i]<=S.pts.length){layerSeg(S,F.drawn[i],done?1e9:idx);F.drawn[i]=done?S.pts.length+1:idx+1}
+    if(!done){pen=p;penV=S.v[idx]}});
+  if(!pen&&t<F.tEnd){for(let i=1;i<s.strokes.length;i++){const a=F.start[i-1]+s.strokes[i-1].dur/F.k,b=F.start[i];if(t>=a&&t<b){const u=smooth((t-a)/(b-a)),p=s.strokes[i-1].pts.at(-1),q=s.strokes[i].pts[0];pen=[p[0]+(q[0]-p[0])*u,p[1]+(q[1]-p[1])*u];pen.air=true}}}
+  // camera
+  const pull=ease((t-F.tEnd)/1.7),follow=pen&&!F.reduced?pen:F.center;
+  const kf=Math.min(1,dt*2.4);F.cam.x+=(follow[0]-F.cam.x)*kf;F.cam.y+=(follow[1]-F.cam.y)*kf;
+  const b=s.box;const cx0=clamp(F.cam.x,b.minX+b.w*.2,b.maxX-b.w*.2),cy0=clamp(F.cam.y,b.minY+b.h*.25,b.maxY-b.h*.25);
+  const introZ=F.reduced?1:1+(F.camZ-1)*ease((t-.4)/1.2);
+  const z=t<F.tEnd?introZ:F.camZ+(1-F.camZ)*pull,cx=(t<F.tEnd?cx0:cx0+(F.center[0]-cx0)*pull),cy=(t<F.tEnd?cy0:cy0+(F.center[1]-cy0)*pull);
+  const S2=F.fsc*z,ax=F.anchor[0],ay=F.anchor[1];
+  const toS=p=>[ax+(p[0]-cx)*S2,ay+(p[1]-cy)*S2];
+  // draw
+  c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='source-over';c.globalAlpha=1;
+  c.drawImage(F.bg,0,0);
+  c.setTransform(dpr,0,0,dpr,0,0);
+  const introA=smooth(t/.9);
+  if(sc.line){const y0=b.maxY*.25+4,l0=toS([b.minX-6,y0]),l1=toS([b.maxX+6,y0]),u=ease((t-.2)/.9);
+    c.globalAlpha=introA*.55*(1-smooth((t-F.tEnd-1.2)/1));c.strokeStyle='#8A8E92';c.lineWidth=1;c.beginPath();c.moveTo(l0[0],l0[1]);c.lineTo(l0[0]+(l1[0]-l0[0])*u,l0[1]+(l1[1]-l0[1])*u);c.stroke();
+    c.lineWidth=1.3;c.beginPath();c.moveTo(l0[0]+2,l0[1]-16);c.lineTo(l0[0]+12,l0[1]-6);c.moveTo(l0[0]+12,l0[1]-16);c.lineTo(l0[0]+2,l0[1]-6);c.stroke();c.globalAlpha=1}
+  const lx=ax+(F.bx0-cx)*S2,ly=ay+(F.by0-cy)*S2,lw=F.layer.width/F.L*S2,lh=F.layer.height/F.L*S2;
+  let flick=1;if(sc.flicker&&t>F.tEnd&&t<F.tEnd+.9){const u=(t-F.tEnd)/.9;flick=(Math.sin(u*70)>.2||u>.75)?1:.35}
+  if(F.glowL){c.globalCompositeOperation=sc.dark?'lighter':'source-over';c.globalAlpha=(sc.trail?.95:.85)*flick*(sc.dark?1:.6);c.drawImage(F.glowL,lx,ly,lw,lh);
+    if(sc.glow2){c.globalAlpha=.35*flick;c.drawImage(F.glowL,lx-3,ly+2,lw,lh)}c.globalAlpha=1;c.globalCompositeOperation='source-over'}
+  c.globalAlpha=sc.flicker?Math.max(.55,flick):1;c.drawImage(F.layer,lx,ly,lw,lh);c.globalAlpha=1;
+  // shimmer sweep
+  if(sc.shimmer&&t>F.tEnd+.2&&t<F.tEnd+1.9){const u=(t-F.tEnd-.2)/1.7;if(!F.tmp)F.tmp=document.createElement('canvas');const tc=F.tmp;tc.width=fcv.width;tc.height=fcv.height;const tx=tc.getContext('2d');
+    tx.setTransform(dpr,0,0,dpr,0,0);tx.drawImage(F.layer,lx,ly,lw,lh);tx.globalCompositeOperation='source-atop';const x0=-F.W*.3+u*F.W*1.6,g=tx.createLinearGradient(x0-120,0,x0+120,F.H*.25);
+    g.addColorStop(0,'rgba(255,250,230,0)');g.addColorStop(.5,'rgba(255,250,230,.95)');g.addColorStop(1,'rgba(255,250,230,0)');tx.fillStyle=g;tx.fillRect(0,0,F.W,F.H);
+    c.setTransform(1,0,0,1,0,0);c.globalCompositeOperation='lighter';c.drawImage(tc,0,0);c.globalCompositeOperation='source-over';c.setTransform(dpr,0,0,dpr,0,0)}
+  // studio wipe: signature settles with a thin rule
+  // pen tip + particles
+  if(pen){const[px,py]=toS(pen);
+    if(sc.dark){const r=sc.trail?34:20,g=c.createRadialGradient(px,py,0,px,py,r);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.25,sc.glow||'rgba(255,255,255,.5)');g.addColorStop(1,'rgba(0,0,0,0)');
+      c.globalCompositeOperation='lighter';c.fillStyle=g;c.beginPath();c.arc(px,py,r,0,7);c.fill();c.globalCompositeOperation='source-over'}
+    else if(!pen.air){c.fillStyle=F.scene==='paper'?hexA(state.ink,.35):'rgba(0,0,0,.25)';c.beginPath();c.arc(px,py,2.2,0,7);c.fill()}
+    if(sc.sparks&&!F.reduced&&!pen.air){const n=sc.sparks==='gold'?Math.round(2+penV*2):2;for(let i=0;i<n;i++){const a=Math.random()*6.28,sp=(sc.sparks==='gold'?30+Math.random()*90:8+Math.random()*25);
+      F.parts.push({x:px,y:py,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-(sc.sparks==='ember'?20:0),life:0,max:.5+Math.random()*.9,r:sc.sparks==='gold'?.8+Math.random()*1.6:1+Math.random()*2.2})}}}
+  if(F.parts.length){c.globalCompositeOperation='lighter';F.parts=F.parts.filter(p=>{p.life+=dt;if(p.life>p.max)return false;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=(sc.sparks==='gold'?60:-12)*dt;p.vx*=.98;
+    const a=1-p.life/p.max;c.fillStyle=sc.sparks==='gold'?`rgba(255,${200+Math.round(40*a)},${120+Math.round(80*a)},${a})`:`rgba(255,${120+Math.round(60*a)},60,${a*.8})`;c.beginPath();c.arc(p.x,p.y,p.r*a+.3,0,7);c.fill();return true});c.globalCompositeOperation='source-over'}
+  // lockup
+  const lk=ease((t-F.tEnd-1.1)/1.3);
+  if(lk>0){const sigBottom=ay+(b.maxY-F.center[1])*F.fsc+s.maxW*F.fsc,y=Math.min(F.H-70,sigBottom+46);
+    const name=s.cn?[...s.words.join('')].join(''):s.words.join(' ').toUpperCase(),fs=clamp(F.W*.021,14,30),sp=fs*(.95-.55*lk);
+    c.globalAlpha=lk;c.fillStyle=sc.fg;c.font=`500 ${fs}px ${sc.font},"Noto Serif TC",serif`;c.textBaseline='alphabetic';
+    const widths=[...name].map(ch=>c.measureText(ch).width),tw=widths.reduce((a,w)=>a+w,0)+sp*(name.length-1);let x=F.W/2-tw/2;
+    [...name].forEach((ch,i)=>{c.fillText(ch,x,y);x+=widths[i]+sp});
+    const rw=60*lk;c.strokeStyle=sc.sub;c.lineWidth=1;c.beginPath();c.moveTo(F.W/2-rw,y-fs-16);c.lineTo(F.W/2+rw,y-fs-16);c.stroke();
+    const tag=($('fTag').value||'').trim()||STYLES[state.style].en+' · '+STYLES[state.style].zh;const la=ease((t-F.tEnd-1.6)/1.1);
+    if(la>0){c.globalAlpha=la;c.fillStyle=sc.sub;const fs2=clamp(F.W*.009,10.5,13);c.font=`500 ${fs2}px "IBM Plex Mono", "Noto Sans TC", monospace`;
+      const chars=[...tag],sp2=fs2*.32,w2=chars.map(ch=>c.measureText(ch).width),tw2=w2.reduce((a,w)=>a+w,0)+sp2*(chars.length-1);let x2=F.W/2-tw2/2;chars.forEach((ch,i)=>{c.fillText(ch,x2,y+fs2+18);x2+=w2[i]+sp2})}
+    c.globalAlpha=1}
+  if(s.seal){const e=clamp((t-F.tEnd-.55)/.3,0,1);if(e>0){const pop=1+.5*(1-e)*(1-e);drawSeal(c,s.seal,{sc:S2,ox:ax-cx*S2,oy:ay-cy*S2},e,pop)}}
+  // grain + vignette-ish intro/outro fades
+  if(sc.grain&&!F.reduced){c.setTransform(1,0,0,1,0,0);c.globalAlpha=sc.grain;c.globalCompositeOperation=sc.dark?'screen':'multiply';const pat=c.createPattern(F.noise,'repeat');c.save();c.translate(Math.random()*192|0,Math.random()*192|0);c.fillStyle=pat;c.fillRect(-192,-192,fcv.width+384,fcv.height+384);c.restore();c.globalAlpha=1;c.globalCompositeOperation='source-over'}
+  c.setTransform(1,0,0,1,0,0);
+  const fadeIn=1-smooth(t/.6),fadeOut=F.loop?smooth((t-(F.total-.8))/.8):0,fa=Math.max(fadeIn,fadeOut);
+  if(fa>0){c.globalAlpha=fa;c.fillStyle=sc.dark?'#000':sc.bg;c.fillRect(0,0,fcv.width,fcv.height);c.globalAlpha=1}
+  if(F.on)F.raf=requestAnimationFrame(filmFrame);
+}
+let idleT=0;function wake(){film.classList.remove('idle');clearTimeout(idleT);idleT=setTimeout(()=>{if(!film.contains(document.activeElement)||document.activeElement===document.body||document.activeElement===fcv)film.classList.add('idle')},2600)}
+function openFilm(){
+  if(state.practice)togglePractice(false);A.playing=false;setPlayBtn();cancelAnimationFrame(A.raf);
+  F.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;film.hidden=false;F.on=true;renderChips();
+  try{const p=film.requestFullscreen&&film.requestFullscreen();if(p&&p.catch)p.catch(()=>{})}catch(e){}
+  requestAnimationFrame(()=>{filmSize();filmPrepare();F.t=0;F.last=performance.now();cancelAnimationFrame(F.raf);F.raf=requestAnimationFrame(filmFrame);wake();fcv.focus?.()});
+}
+function closeFilm(){F.on=false;cancelAnimationFrame(F.raf);film.hidden=true;try{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}finishAll();$('bFilm').focus()}
+$('bFilm').onclick=openFilm;$('fClose').onclick=closeFilm;
+$('fReplay').onclick=()=>{filmPrepare();F.t=0};
+$('fLoop').onchange=e=>{F.loop=e.target.checked};
+$('fFull').onclick=()=>{try{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else{const p=film.requestFullscreen&&film.requestFullscreen();if(p&&p.catch)p.catch(()=>toast('這個檢視環境不支援瀏覽器全螢幕'))}}catch(e){toast('這個檢視環境不支援瀏覽器全螢幕')}};
+film.addEventListener('pointermove',wake);film.addEventListener('pointerdown',wake);
+document.addEventListener('keydown',e=>{if(!F.on||e.target.tagName==='INPUT')return;const keys=Object.keys(SCENES),i=keys.indexOf(F.scene);
+  if(e.key==='Escape'&&!document.fullscreenElement)closeFilm();
+  else if(e.key===' '){e.preventDefault();filmPrepare();F.t=0}
+  else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){F.scene=keys[(i+(e.key==='ArrowRight'?1:keys.length-1))%keys.length];renderChips();filmPrepare();F.t=0}
+  wake()});
+document.addEventListener('fullscreenchange',()=>{if(F.on)setTimeout(()=>{filmSize();filmPrepare();F.t=0},60)});
+new ResizeObserver(()=>{if(!F.on)return;filmSize();filmPrepare();F.t=0}).observe(film);
+
+
+/* ============ auto suggestion ============ */
+// traits: legibility, formality, flair, speed, uniqueness, elegance
+const TRAITS={emoteEN:[.82,.15,.7,.75,.92,.6],cuteCN:[.8,.15,.65,.72,.92,.55],oneLine:[.55,.45,.8,.95,.8,.8],autograph:[.45,.4,.9,.9,.75,.75],loopLine:[.5,.4,.8,.85,.85,.7],paraphOne:[.6,.6,.75,.8,.85,.75],
+  classic:[.9,.75,.45,.5,.4,.9],copper:[.75,.85,.8,.3,.65,.95],grand:[.7,.7,.85,.35,.8,.95],business:[.85,.95,.4,.7,.35,.6],initSur:[.75,.85,.5,.9,.45,.7],
+  minimal:[.9,.6,.25,.8,.3,.6],marker:[.75,.4,.8,.8,.6,.5],brush:[.7,.45,.85,.75,.65,.6],scrawl:[.3,.3,.7,1,.75,.45],monogram:[.4,.75,.8,.8,.95,.85],casual:[.8,.4,.5,.75,.5,.6],
+  oneline:[.4,.4,.85,.95,.9,.7],ringCN:[.45,.45,.8,.85,.9,.75],star:[.4,.3,.9,.9,.8,.65],swiftCN:[.25,.3,1,.95,.9,.7],
+  xingOut:[.9,.8,.6,.55,.55,.9],kaiOut:[.97,.95,.3,.3,.35,.8],bizOut:[.82,.9,.55,.65,.55,.78],threadOut:[.8,.7,.8,.55,.85,.88],vertOut:[.9,.85,.5,.4,.75,.9],
+  cao:[.3,.35,.95,.85,.8,.75],pen:[.85,.65,.3,.8,.3,.6]};
+const TRAIT_ZH=['易讀','正式感','氣勢','書寫速度','辨識度','優雅'];
+const USES={daily:{zh:'日常簽署',w:[.25,.1,.1,.35,.1,.1],aspect:3.6,scene:'paper'},contract:{zh:'合約文件',w:[.35,.4,0,.1,.05,.1],aspect:4,scene:'paper'},
+  brand:{zh:'品牌 Logo',w:[.1,.1,.3,0,.35,.15],aspect:2.8,scene:'gold'},fan:{zh:'粉絲簽名',w:[.05,0,.35,.35,.15,.1],aspect:3,scene:'neon'}};
+const MOODS={steady:{zh:'穩重',w:[.2,.5,0,.1,0,.2]},elegant:{zh:'優雅',w:[.15,.2,.1,0,.1,.45]},free:{zh:'率性',w:[0,0,.45,.35,.2,0]},unique:{zh:'獨特',w:[0,0,.3,0,.6,.1]},cute:{zh:'可愛',w:[.35,0,.1,.1,.4,.05]}};
+const sug={use:'daily',mood:'elegant',list:[],oneOnly:false};
+function nameFeatures(nm){
+  if(state.script==='cn'){const ch=[...nm].filter(c=>isCJK(c)&&HZ[c]),cnt=ch.map(c=>decodeHZ(c).length);return{cn:true,n:ch.length||1,total:cnt.reduce((a,b)=>a+b,0),first:ch[0]||'',firstN:cnt[0]||0}}
+  const words=(nm||'').replace(/[^A-Za-z\s]/g,' ').trim().split(/\s+/).filter(Boolean);const letters=words.join('');
+  return{words:words.length||1,n:letters.length||1,desc:(letters.match(/[gjpqy]/g)||[]).length,asc:(letters.match(/[bdfhklt]/g)||[]).length,
+    loopCap:/^[LJSTFGHKBDRI]/.test(words[0]?words[0][0].toUpperCase():''),first:words[0]?words[0][0].toUpperCase():'S'}}
+function nameFitCN(k,f){const s=STYLES[k];let v=.5;const why=[];
+  if(f.n===2&&['star','oneline','cao'].includes(k)){v+=.15;why.push('兩個字的名字，連筆拉長後比例更好看')}
+  if(f.n>=4&&['bizOut','oneline','star'].includes(k)){v+=.2;why.push(`${f.n} 個字偏長，後面的字縮小連寫，簽名不會拖太寬`)}
+  if(f.total>30){if(['cao','oneline','star','swiftCN','ringCN'].includes(k)){v+=.18;why.push(`總筆畫 ${f.total} 畫偏多，連筆與省略能大幅縮短書寫時間`)}if(k==='kaiOut')v-=.15}
+  if(f.total<16&&['kaiOut','vertOut','xingOut','threadOut'].includes(k)){v+=.15;why.push(`總筆畫只有 ${f.total} 畫，保留完整筆畫更有份量`)}
+  if(f.firstN>=12&&s.cap>=1.3){v+=.08;why.push(`姓氏「${f.first}」有 ${f.firstN} 畫，放大後結構更清楚`)}
+  return{v:clamp(v,0,1),why}}
+function nameFit(k,f){if(f.cn)return nameFitCN(k,f);const s=STYLES[k];let v=.5;const why=[];
+  if(f.n>11){if(s.sx<.9||s.monogram||s.autoInit){v+=.25;why.push(`名字有 ${f.n} 個字母偏長，這個風格會壓縮字寬${s.autoInit?'並把名字縮寫':''}，簽起來不會拖太長`)}if(k==='copper'||k==='grand'){v-=.2}}
+  if(f.n<=6){if(['copper','grand','autograph','brush'].includes(k)){v+=.2;why.push(`名字只有 ${f.n} 個字母，較多的花飾可以撐起整體份量`)}if(k==='monogram')v-=.1}
+  if(f.words<2&&(k==='monogram'||s.autoInit)){v-=.25}
+  if(f.words>=2&&k==='monogram'){v+=.1;why.push(`取 ${f.first} 等首字母交疊，適合做成印記`)}
+  if(f.loopCap&&s.cap>=1.8){v+=.15;why.push(`首字母 ${f.first} 本身有迴圈結構，放大後很有記憶點`)}
+  if(f.desc>=2&&(s.flourish.includes('paraph')||s.flourish[0]==='underline')){v-=.12}
+  if(f.desc>=2&&s.flourish.some(x=>x==='tail'||x==='loopTail')){v+=.08;why.push(`名字有 ${f.desc} 個下伸字母（如 g、y），長尾花飾能順勢接住`)}
+  if(f.asc>=3&&s.slant>=18){v+=.06}
+  return{v:clamp(v,0,1),why}}
+function metricsOf(sg,useK){const b=sg.box,aspect=b.w/Math.max(1,b.h),lifts=sg.strokes.length-1;
+  let secs=0;sg.strokes.forEach((S,i)=>{secs+=S.dur/.8;if(i)secs+=sg.lift(sg.strokes[i-1].pts.at(-1),S.pts[0])});
+  const ideal=USES[useK].aspect,aS=Math.exp(-Math.pow(Math.log(aspect/ideal),2)/.35),tS=clamp(1-(secs-2.5)/9,0,1),lS=clamp(1-lifts/(sg.cn?32:14),0,1);
+  const w=useK==='brand'?[.6,.1,.3]:useK==='contract'?[.4,.3,.3]:[.35,.4,.25];
+  return{aspect,lifts,secs,v:aS*w[0]+tS*w[1]+lS*w[2]}}
+function runSuggest(){
+  if(state.loading||!sig||!!sig.cn!==(state.script==='cn'))return;
+  const f=nameFeatures(state.name),U=USES[sug.use],Md=MOODS[sug.mood];
+  const pre=stylesOf(state.script).filter(k=>!sug.oneOnly||STYLES[k].one).map(k=>{const T=TRAITS[k],tr=.6*T.reduce((a,x,i)=>a+x*U.w[i],0)+.4*T.reduce((a,x,i)=>a+x*Md.w[i],0),nf=nameFit(k,f);return{k,tr,nf,p:tr*.7+nf.v*.3+(sug.mood==='cute'&&STYLES[k].emote?.3:0)+(sug.mood!=='cute'&&STYLES[k].emote?-.08:0)}}).sort((a,b)=>b.p-a.p).slice(0,6);
+  const out=pre.map(c=>{const s=STYLES[c.k];let best=null;
+    for(let seed=0;seed<6;seed++){const sg=build({name:state.name,style:c.k,seed,slant:s.slant,cap:s.cap,sw:s.sw,w:1,m:state.m,initials:!!s.autoInit,cn:scriptOf(c.k)==='cn',seal:!!s.seal,link:s.link,simplify:s.simplify}),m=metricsOf(sg,sug.use),ev=evaluate(sg),sc=ev.overall/100*.6+m.v*.4;if(!best||sc>best.sc)best={seed,sg,m,ev,sc}}
+    const total=.42*c.tr+.15*c.nf.v+.43*best.ev.overall/100+(sug.mood==='cute'&&STYLES[c.k].emote?.12:0);
+    // reasons: top two matching traits for the chosen use & mood
+    const T=TRAITS[c.k],cw=U.w.map((x,i)=>x*.6+Md.w[i]*.4),top=T.map((x,i)=>[x*cw[i],i,x]).sort((a,b)=>b[0]-a[0]).slice(0,2).filter(x=>x[2]>=.6);
+    const why=[];if(top.length)why.push(`${U.zh}與「${Md.zh}」重視${top.map(x=>TRAIT_ZH[x[1]]).join('和')}，這個風格在這兩項表現${top.every(x=>x[2]>=.8)?'特別突出':'良好'}`);
+    if(STYLES[c.k].emote)why.push('符號直接融進字形（愛心、笑臉、星星），第一眼就有親切感');
+    if(best.ev.lifts===0)why.push('一筆就能簽完，筆尖不離紙，簽名動作本身就很有看頭');
+    why.push(...c.nf.why.slice(0,1));
+    const m=best.m;if(m.lifts<=4)why.push(`只需提筆 ${m.lifts} 次，約 ${m.secs.toFixed(1)} 秒寫完，容易練到穩定`);else if(Math.abs(Math.log(m.aspect/U.aspect))<.25)why.push(`長寬比 ${m.aspect.toFixed(1)}，放在${sug.use==='brand'?'Logo 或名片':'簽名欄'}裡比例剛好`);
+    return{k:c.k,seed:best.seed,sg:best.sg,m,ev:best.ev,total,why:why.slice(0,3)}}).sort((a,b)=>b.total-a.total).slice(0,3);
+  sug.list=out;renderSuggest()}
+function renderSuggest(){
+  const g=$('sugGrid');g.innerHTML='';
+  sug.list.forEach((c,i)=>{const s=STYLES[c.k],pct=Math.round(clamp(c.total,0,1)*100),el=document.createElement('article');el.className='sug';
+    el.innerHTML=`<canvas></canvas><div class="body"><div class="top"><span><span class="rank">推薦 ${i+1}</span><br><span class="name">${s.zh}</span> <span class="rank">${s.en}</span></span><span class="pct">適配 ${pct}%<br><span class="rank">評估 ${c.ev.grade} · ${c.ev.overall}</span></span></div>
+      <div class="meter"><i style="width:${pct}%"></i></div><ul>${c.why.map(w=>`<li>${w}</li>`).join('')}</ul>
+      <div class="metrics">長寬比 ${c.m.aspect.toFixed(1)} · ${c.ev.lifts===0?'一筆完成':c.sg.strokes.length+' 筆'} · 約 ${c.m.secs.toFixed(1)} 秒 · 變化 No.${String(c.seed+1).padStart(4,'0')}</div>
+      <div class="acts"><button class="btn primary" type="button" data-a="apply">套用這個</button><button class="btn" type="button" data-a="film">播成品牌動畫</button></div></div>`;
+    g.appendChild(el);
+    el.querySelector('[data-a=apply]').onclick=()=>{applySuggestion(c);window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})};
+    el.querySelector('[data-a=film]').onclick=()=>{applySuggestion(c,false);F.scene=USES[sug.use].scene;openFilm()};
+    const cvs=el.querySelector('canvas');requestAnimationFrame(()=>{const r=cvs.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1);cvs.width=r.width*dpr;cvs.height=r.height*dpr;const x=cvs.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);drawAll(x,c.sg,fit(c.sg.box,r.width,r.height,c.sg.maxW,14,14),state.ink)})});
+}
+function applySuggestion(c,play=true){styleDefaults(c.k);state.seed=c.seed;renderStyles();regenerate(play);renderGallery()}
+function renderSugControls(){
+  const mk=(boxId,map,key)=>{const box=$(boxId);box.querySelectorAll('button').forEach(b=>b.remove());for(const[k,o]of Object.entries(map)){const b=document.createElement('button');b.type='button';b.className='pill';b.textContent=o.zh;b.setAttribute('aria-pressed',sug[key]===k);b.onclick=()=>{sug[key]=k;renderSugControls();runSuggest()};box.appendChild(b)}};
+  mk('sugUse',USES,'use');mk('sugMood',MOODS,'mood');$('sugOne').setAttribute('aria-pressed',sug.oneOnly)}
+$('sugOne').onclick=()=>{sug.oneOnly=!sug.oneOnly;renderSugControls();runSuggest()};
+renderSugControls();
+
+/* ============ boot ============ */
+renderStyles();renderInks();syncSliders();
+function boot(){loadHands().then(boot2).catch(()=>{$('nameHint').textContent='字型筆跡資料載入失敗，請重新整理頁面再試一次。'})}
+function boot2(){sizeCanvases();regenerate(false);renderGallery();runSuggest();if(!matchMedia('(prefers-reduced-motion: reduce)').matches)setTimeout(()=>startAt(0,true),900)}
+let rt=0;new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(()=>{if(!sig)return;sizeCanvases();layoutView();drawGuide();if(state.practice)clearPractice();if(A.playing)startAt(A.si,true);else{resetInk(Math.min(A.si,sig.strokes.length));drawTop()}},120)}).observe(stage);
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(boot);
+</script>
+</body>
+</html>

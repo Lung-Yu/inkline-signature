@@ -1,0 +1,8 @@
+/hands.json
+  Cache-Control: public, max-age=604800
+/hz/*
+  Cache-Control: public, max-age=2592000, immutable
+/index.html
+  Cache-Control: no-cache
+/config.js
+  Cache-Control: no-cache

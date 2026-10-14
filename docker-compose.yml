@@ -1,0 +1,9 @@
+services:
+  inkline:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      # 從 shell 或同目錄的 .env 讀取；留空用 index.html 內建值
+      DEFAULT_NAME_LATIN: ${DEFAULT_NAME_LATIN:-}
+      DEFAULT_NAME_CN: ${DEFAULT_NAME_CN:-}

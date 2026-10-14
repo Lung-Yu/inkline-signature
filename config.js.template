@@ -1,0 +1,2 @@
+// ponytail: envsubst 不跳脫，名字裡不能有 " 或 \
+window.INKLINE_DEFAULTS={latin:"${DEFAULT_NAME_LATIN}",cn:"${DEFAULT_NAME_CN}"};

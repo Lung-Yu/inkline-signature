@@ -1,0 +1,7 @@
+.DS_Store
+.env
+# tools/ 重新產生資料時的暫存
+fonts/
+src/
+*.tgz
+node_modules/
